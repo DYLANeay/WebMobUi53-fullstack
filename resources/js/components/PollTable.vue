@@ -1,69 +1,65 @@
 <script setup>
-import { useFetchApi } from "../composables/useFetchApi";
+import PollStatusBadge from "./PollStatusBadge.vue";
 
 defineProps({
-    polls: { type: Array, default: () => [] },
+  polls: { type: Array, default: () => [] },
 });
 
-const { fetchApi } = useFetchApi();
+defineEmits(["edit", "delete"]);
 
-function editPoll(id) {
-    alert(`Editer le sondage ${id}`);
-}
-
-async function deletePoll(id) {
-    if (!confirm(`Voulez-vous vraiment supprimer le sondage ${id} ?`)) return;
-
-    try {
-        await fetchApi({ url: `/polls/${id}`, method: "DELETE" });
-        alert(`Sondage ${id} supprimé`);
-    } catch (err) {
-        console.error(err);
-        alert(`Erreur lors de la suppression du sondage ${id}`);
-    }
+function formatDate(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString();
 }
 </script>
 
 <template>
-    <p v-if="polls.length === 0">Aucun sondage.</p>
+  <p v-if="polls.length === 0" class="text-sm text-gray-500">
+    Aucun sondage pour le moment.
+  </p>
 
-    <table v-else class="w-full border-collapse text-left">
-        <thead>
-            <tr>
-                <th class="border px-3 py-2">ID</th>
-                <th class="border px-3 py-2">Titre</th>
-                <th class="border px-3 py-2">Question</th>
-                <th class="border px-3 py-2">Brouillon</th>
-                <th class="border px-3 py-2">Debut</th>
-                <th class="border px-3 py-2">Fin</th>
-                <th class="border px-3 py-2">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="poll in polls" :key="poll.id">
-                <td class="border px-3 py-2">{{ poll.id }}</td>
-                <td class="border px-3 py-2">{{ poll.title || "-" }}</td>
-                <td class="border px-3 py-2">{{ poll.question }}</td>
-                <td class="border px-3 py-2">
-                    {{ poll.is_draft ? "Oui" : "Non" }}
-                </td>
-                <td class="border px-3 py-2">{{ poll.started_at || "-" }}</td>
-                <td class="border px-3 py-2">{{ poll.ends_at || "-" }}</td>
-                <td class="border px-3 py-2">
-                    <button
-                        class="bg-blue-500 text-white px-2 py-1 rounded"
-                        @click="editPoll(poll.id)"
-                    >
-                        Editer
-                    </button>
-                    <button
-                        class="bg-red-500 text-white px-2 py-1 rounded"
-                        @click="deletePoll(poll.id)"
-                    >
-                        Supprimer
-                    </button>
-                </td>
-            </tr>
-        </tbody>
+  <div v-else class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 font-medium text-gray-700">Question</th>
+          <th class="px-4 py-3 font-medium text-gray-700">Statut</th>
+          <th class="px-4 py-3 font-medium text-gray-700">Début</th>
+          <th class="px-4 py-3 font-medium text-gray-700">Fin</th>
+          <th class="px-4 py-3 text-right font-medium text-gray-700">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 bg-white">
+        <tr v-for="poll in polls" :key="poll.id" class="hover:bg-gray-50">
+          <td class="px-4 py-3 text-gray-900">
+            <div class="font-medium">{{ poll.title || poll.question }}</div>
+            <div v-if="poll.title" class="text-xs text-gray-500">
+              {{ poll.question }}
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <PollStatusBadge :poll="poll" />
+          </td>
+          <td class="px-4 py-3 text-gray-600">{{ formatDate(poll.started_at) }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ formatDate(poll.ends_at) }}</td>
+          <td class="px-4 py-3 text-right">
+            <button
+              type="button"
+              class="rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              @click="$emit('edit', poll)"
+            >
+              Éditer
+            </button>
+            <button
+              type="button"
+              class="ml-2 rounded-md bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-500"
+              @click="$emit('delete', poll)"
+            >
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
     </table>
+  </div>
 </template>
