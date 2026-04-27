@@ -7,11 +7,10 @@
         Sondages
     </x-slot>
 
-    <div
-        id="app"
-        data-props='@json([
-            "polls" => $polls,
-            "loginUrl" => route("login"),
-        ])'
-    ></div>
+    {{-- {{ pour échapper les caractères présents dans les polls (notamment leurs guillemets)}} --}}
+    <div id="app"
+        data-props="{{ json_encode([
+            'polls' => $polls,
+            'loginUrl' => route('login'),
+        ]) }}"></div>
 </x-vue-app-layout>
