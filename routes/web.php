@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PollCreateController;
 use App\Http\Controllers\PollDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TokenController;
@@ -41,6 +42,9 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware("auth")->group(function () {
     Route::get("/polls/dashboard", PollDashboardController::class)->name(
         "polls.dashboard",
+    );
+    Route::get("/polls/create", PollCreateController::class)->name(
+        "polls.create",
     );
     Route::resource("posts", PostController::class)->except(["index", "show"]);
     Route::singleton("my-profile", MyProfileController::class)->destroyable();
