@@ -1,11 +1,12 @@
 import { reactive, ref } from "vue";
 import { useFetchApi } from "./useFetchApi";
 
-export function usePollForm() {
+export function usePollForm(pollId = null) {
     //cree une instance du composable avec /api/v1 comme base
     const { fetchApi } = useFetchApi("/api/v1");
 
-    const errors = reactive({});
+    const isEdit = !!pollId;
+    const errors = ref({});
     const submitting = ref(false);
 
     function clearErrors() {
@@ -43,15 +44,16 @@ export function usePollForm() {
         clearErrors();
 
         // Construit le payload à envoyer à l'API :
-        // - normalise question et labels en NFC (cohérence Unicode)
-        // - filtre les options laissées vides par l'utilisateur
-        // - met title/duration à null si vides (plutôt que chaîne vide)
+
         const payload = {
             question: form.question.normalize("NFC"),
             title: form.title || null,
             options: form.options
                 .filter((o) => o.label.trim() !== "")
-                .map((o) => ({ label: o.label.normalize("NFC") })),
+                .map((o) => ({
+                    ...(o.id ? { id: o.id } : {}),
+                    label: o.label.normalize("NFC"),
+                })),
             allow_multiple_choices: form.allow_multiple_choices,
             allow_vote_change: form.allow_vote_change,
             results_public: form.results_public,
@@ -59,10 +61,10 @@ export function usePollForm() {
         };
 
         try {
-            // Envoie POST /api/v1/polls et retourne le poll créé (avec ses options)
+            // Envoie POST ou PUT et retourne le poll
             const poll = await fetchApi({
-                url: "/polls",
-                method: "POST",
+                url: isEdit ? `/polls/${pollId}` : "/polls",
+                method: isEdit ? "PUT" : "POST",
                 data: payload,
             });
             return poll;
@@ -75,5 +77,5 @@ export function usePollForm() {
         }
     }
 
-    return { errors, submitting, validate, submit };
+    return { errors, submitting, validate, submit, isEdit };
 }

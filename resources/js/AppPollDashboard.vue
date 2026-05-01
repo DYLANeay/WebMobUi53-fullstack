@@ -4,11 +4,13 @@ import PollTable from "./components/PollTable.vue";
 import ConfirmModal from "./components/ConfirmModal.vue";
 import { usePolls } from "./composables/usePolls";
 
+//rend data accessible dans compo
 const props = defineProps({
     polls: { type: Array, default: () => [] },
 });
 
 // Utilise le composable pour gérer les sondages et on utilise une ref pour les polls!
+// car une prop est en lecture seule, on ne peut pas la modifier directement, mais usePolls nous fournit une ref réactive qui contient les sondages et que nous pouvons mettre à jour
 const { polls, error, remove } = usePolls(props.polls);
 
 const confirmOpen = ref(false);
@@ -16,6 +18,7 @@ const pollToDelete = ref(null);
 
 function askDelete(poll) {
     pollToDelete.value = poll;
+    //ouvre la modal
     confirmOpen.value = true;
 }
 
@@ -68,7 +71,7 @@ function goEdit(poll) {
         <!-- @confirm qui est déclenché quand l'utilisateur confirme la suppression, on appelle la fonction confirmDelete -->
         <!-- //si l'utilisateur annule, on ne fait rien donc pas besoin de gérer l'événement cancel -->
         <ConfirmModal
-            v-model="confirmOpen"
+            v-model:open="confirmOpen"
             title="Supprimer le sondage"
             :message="
                 pollToDelete
