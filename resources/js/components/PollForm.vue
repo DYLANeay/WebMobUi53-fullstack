@@ -3,19 +3,47 @@ import { ref, watch } from "vue";
 import PollOptionInput from "./PollOptionInput.vue";
 import { usePollForm } from "../composables/usePollForm";
 
-const emit = defineEmits(["saved"]);
-
-const form = ref({
-    title: "",
-    question: "",
-    options: [{ label: "" }, { label: "" }],
-    allow_multiple_choices: false,
-    allow_vote_change: false,
-    results_public: false,
-    duration: null,
+const props = defineProps({
+    poll: { type: Object, default: null },
 });
 
-const { errors, submitting, validate, submit } = usePollForm();
+const emit = defineEmits(["saved"]);
+
+function buildInitialForm() {
+    //donc si le poll a bien été repassé par laravel, on pré-remplit le formulaire avec ses données, sinon on part sur des valeurs par défaut pour la création
+    if (props.poll) {
+        return {
+            id: props.poll.id,
+            title: props.poll.title ?? "",
+            question: props.poll.question ?? "",
+            //on map les options du poll pour ne garder que l'id et le label, et si jamais il n'y en a aucune (cas improbable), on initialise avec 2 options vides
+            options: props.poll.options?.map((o) => ({
+                id: o.id,
+                label: o.label,
+            })) ?? [{ label: "" }, { label: "" }],
+            allow_multiple_choices: props.poll.allow_multiple_choices ?? false,
+            allow_vote_change: props.poll.allow_vote_change ?? false,
+            results_public: props.poll.results_public ?? false,
+            duration: props.poll.duration ?? null,
+            is_draft: props.poll.is_draft ?? true,
+        };
+    }
+    return {
+        title: "",
+        question: "",
+        options: [{ label: "" }, { label: "" }],
+        allow_multiple_choices: false,
+        allow_vote_change: false,
+        results_public: false,
+        duration: null,
+        is_draft: true,
+    };
+}
+
+const form = ref(buildInitialForm());
+
+const pollId = props.poll?.id ?? null;
+const { errors, submitting, validate, submit, isEdit } = usePollForm(pollId);
 
 // watch pour la validation live — { deep: true } surveille les propriétés imbriquées
 watch(
@@ -51,8 +79,14 @@ async function handleSubmit() {
 </script>
 
 <template>
-    <form class="space-y-6" @submit.prevent="handleSubmit">
-        <!-- Question -->
+    <div
+        v-if="!form.is_draft"
+        class="rounded-md bg-yellow-50 p-4 text-sm text-yellow-800 ring-1 ring-inset ring-yellow-200"
+    >
+        Ce sondage est lancé et ne peut plus être modifié.
+    </div>
+
+    <form v-else class="space-y-6" @submit.prevent="handleSubmit">
         <div>
             <label
                 for="question"
@@ -175,7 +209,13 @@ async function handleSubmit() {
                 :disabled="submitting"
                 class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
             >
-                {{ submitting ? "Enregistrement…" : "Créer le sondage" }}
+                {{
+                    submitting
+                        ? "Enregistrement…"
+                        : isEdit
+                          ? "Enregistrer les modifications"
+                          : "Créer le sondage"
+                }}
             </button>
         </div>
     </form>
