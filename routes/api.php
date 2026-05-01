@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\v1\ApiPostController;
 use App\Http\Controllers\Api\v1\ApiFooController;
 use App\Http\Controllers\Api\v1\ApiPollController;
+use App\Http\Controllers\Api\v1\ApiPostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,5 +23,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post("/v1/foo", [ApiFooController::class, "store"]);
     Route::get("/v1/polls", [ApiPollController::class, "index"]);
     Route::post("/v1/polls", [ApiPollController::class, "store"]);
+    Route::get("/v1/polls/id/{poll}", [ApiPollController::class, "showById"]);
+    Route::put("/v1/polls/{poll}", [ApiPollController::class, "update"]);
     Route::delete("/v1/polls/{poll}", [ApiPollController::class, "destroy"]);
 });
