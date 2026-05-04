@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\ApiFooController;
 use App\Http\Controllers\Api\v1\ApiPollController;
+use App\Http\Controllers\Api\v1\ApiPollVoteController;
 use App\Http\Controllers\Api\v1\ApiPostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,4 +28,12 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::put("/v1/polls/{poll}", [ApiPollController::class, "update"]);
     Route::post("/v1/polls/{poll}/start", [ApiPollController::class, "start"]);
     Route::delete("/v1/polls/{poll}", [ApiPollController::class, "destroy"]);
+    Route::post("/v1/polls/{token}/vote", [
+        ApiPollVoteController::class,
+        "store",
+    ]);
+    Route::get("/v1/polls/{token}/vote", [
+        ApiPollVoteController::class,
+        "show",
+    ]);
 });
