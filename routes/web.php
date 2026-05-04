@@ -34,9 +34,6 @@ Route::get("/@{username}", [ProfileController::class, "show"])->where(
 
 Route::resource("posts", PostController::class)->only(["index", "show"]);
 
-//without middleware auth, since some1 can see the poll even if they are not authenticated, but they cannot vote if they are not authenticated
-Route::get("/polls/{token}", PollShowController::class)->name("polls.show");
-
 Route::controller(AuthController::class)->group(function () {
     Route::get("/auth/register", "showRegister");
     Route::post("/auth/register", "register");
@@ -68,3 +65,6 @@ Route::middleware("auth")->group(function () {
     ]);
     Route::post("/auth/logout", [AuthController::class, "logout"]);
 });
+
+// at the end so that /polls/dashboard, /polls/create, etc. are matched first.
+Route::get("/polls/{token}", PollShowController::class)->name("polls.show");
