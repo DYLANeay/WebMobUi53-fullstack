@@ -19,6 +19,8 @@ class Poll extends Model
         "allow_vote_change",
         "results_public",
         "duration",
+        "started_at",
+        "ends_at",
     ];
 
     protected $casts = [
@@ -27,6 +29,10 @@ class Poll extends Model
         "allow_vote_change" => "boolean",
         "results_public" => "boolean",
         "duration" => "integer",
+        //afin d'avoir quelque chose de : 2026-05-04T14:30:00.000000Z
+        // => facilement usable par le front
+        "started_at" => "datetime",
+        "ends_at" => "datetime",
     ];
 
     // boot() est appelé une seule fois par Eloquent au chargement du modèle.
