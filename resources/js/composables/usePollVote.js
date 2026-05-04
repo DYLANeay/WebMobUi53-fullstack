@@ -10,6 +10,7 @@ export function usePollVote() {
     const error = ref(null);
     const success = ref(false);
 
+    // For checkboxes (multiple choice)
     function toggleOption(optionId) {
         const index = selectedOptions.value.indexOf(optionId);
         if (index > -1) {
@@ -17,6 +18,11 @@ export function usePollVote() {
         } else {
             selectedOptions.value.push(optionId);
         }
+    }
+
+    //radio buttons
+    function setSingleOption(optionId) {
+        selectedOptions.value = [optionId];
     }
 
     function isSelected(optionId) {
@@ -39,7 +45,7 @@ export function usePollVote() {
         success.value = false;
 
         try {
-            await fetchApi({
+            const result = await fetchApi({
                 url: `/polls/${token}/vote`,
                 method: "POST",
                 data: {
@@ -47,10 +53,14 @@ export function usePollVote() {
                 },
             });
             success.value = true;
+            return result;
         } catch (err) {
-            if (err.status === 409) {
+            if (err.status === 401) {
                 error.value =
-                    err.data?.message ?? "Vous avez deja voté pour ce sondage.";
+                    err.data?.message ?? "Vous devez être connecté pour voter.";
+            } else if (err.status === 409) {
+                error.value =
+                    err.data?.message ?? "Vous avez déjà voté pour ce sondage.";
             } else if (err.status === 403) {
                 error.value =
                     err.data?.message ?? "Ce sondage n'est pas accessible.";
@@ -76,6 +86,7 @@ export function usePollVote() {
         error,
         success,
         toggleOption,
+        setSingleOption,
         isSelected,
         submit,
         reset,

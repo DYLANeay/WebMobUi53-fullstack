@@ -7,11 +7,12 @@ const props = defineProps({
     poll: { type: Object, required: true },
 });
 
-// ref wrapper
-const pollRef = ref(props.poll);
+// Ref locale : on mute cette valeur après le vote pour rafraîchir les résultats
+// sans recharger la page.
+const poll = ref(props.poll);
 
 // Centralise les computed de statut (avec horloge réactive pour l'expiration)
-const { isDraft, isRunning, isExpired } = usePollStatus(pollRef, {
+const { isDraft, isRunning, isExpired } = usePollStatus(poll, {
     withClock: true,
 });
 
@@ -25,16 +26,25 @@ const {
     error,
     success,
     toggleOption,
+    setSingleOption,
     isSelected,
     submit,
 } = usePollVote();
 
 async function handleSubmit() {
-    await submit(props.poll.secret_token, props.poll.allow_multiple_choices);
+    const result = await submit(
+        poll.value.secret_token,
+        poll.value.allow_multiple_choices,
+    );
+    // L'API retourne le poll avec les votes_count mis à jour.
+    // On injecte ce nouveau poll dans la ref locale → le template se met à jour.
+    if (result) {
+        poll.value = result;
+    }
 }
 
 const totalVotes = computed(() => {
-    return props.poll.options.reduce(
+    return poll.value.options.reduce(
         (sum, opt) => sum + (opt.votes_count || 0),
         0,
     );
@@ -140,11 +150,19 @@ function getPercentage(option) {
                                         ? 'checkbox'
                                         : 'radio'
                                 "
-                                :name="'option-' + option.id"
+                                :name="
+                                    poll.allow_multiple_choices
+                                        ? 'option-' + option.id
+                                        : 'poll-option'
+                                "
                                 :value="option.id"
                                 :checked="isSelected(option.id)"
                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                @change="toggleOption(option.id)"
+                                @change="
+                                    poll.allow_multiple_choices
+                                        ? toggleOption(option.id)
+                                        : setSingleOption(option.id)
+                                "
                             />
                             <span class="text-sm text-gray-700">
                                 {{ option.label }}

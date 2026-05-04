@@ -39,13 +39,13 @@ class ApiPollVoteController extends Controller
         ]);
 
         $optionIds = collect($validated["options"])
-            //apply intval to each element to ensure they are integers
+            // apply intval to each element to ensure they are integers
             ->map("intval")
-            //valide aucun doublons
+            // valide aucun doublons
             ->unique()
             ->values();
 
-        //valide que les options appartiennent bien à ce sondage
+        // valide que les options appartiennent bien à ce sondage
         $validOptionIds = $poll->options->pluck("id");
         if ($optionIds->diff($validOptionIds)->isNotEmpty()) {
             return response()->json(
@@ -54,7 +54,7 @@ class ApiPollVoteController extends Controller
             );
         }
 
-        //sondage max 1 vote
+        // sondage max 1 vote
         if (!$poll->allow_multiple_choices && $optionIds->count() > 1) {
             return response()->json(
                 ["message" => "Only one choice is allowed."],
@@ -72,7 +72,7 @@ class ApiPollVoteController extends Controller
 
                 if ($existing) {
                     if (!$poll->allow_vote_change) {
-                        throw new \Exception("already_voted", 409);
+                        abort(409, "Vous avez déjà voté pour ce sondage.");
                     }
                     // Delete old vote before creating new one
                     $existing->delete();
@@ -114,7 +114,7 @@ class ApiPollVoteController extends Controller
         return response()->json($poll);
     }
 
-    //show poll result for the authenticated user
+    // show poll result for the authenticated user
     public function show(Request $request, string $token)
     {
         $poll = Poll::where("secret_token", $token)->first();
