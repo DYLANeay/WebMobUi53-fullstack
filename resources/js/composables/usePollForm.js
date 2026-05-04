@@ -1,49 +1,46 @@
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 import { useFetchApi } from "./useFetchApi";
 
 export function usePollForm(pollId = null) {
-    //cree une instance du composable avec /api/v1 comme base
     const { fetchApi } = useFetchApi("/api/v1");
 
     const isEdit = !!pollId;
-    const errors = ref({});
+    const formErrors = ref({});
+    const globalError = ref(null);
     const submitting = ref(false);
 
-    function clearErrors() {
-        Object.keys(errors).forEach((k) => delete errors[k]);
+    function clearformErrors() {
+        formErrors.value = {};
+        globalError.value = null;
     }
 
     function validate(form) {
-        clearErrors();
+        clearformErrors();
 
         if (!form.question || form.question.trim().length < 3) {
-            errors.question =
+            formErrors.value.question =
                 "La question doit contenir au moins 3 caractères.";
         }
         if (form.question && form.question.trim().length > 500) {
-            errors.question =
+            formErrors.value.question =
                 "La question ne peut pas dépasser 500 caractères.";
         }
 
         const filled = form.options.filter((o) => o.label.trim() !== "");
         if (filled.length < 2) {
-            errors.options = "Veuillez saisir au moins 2 options.";
+            formErrors.value.options = "Veuillez saisir au moins 2 options.";
         }
 
-        return Object.keys(errors).length === 0;
+        return Object.keys(formErrors.value).length === 0;
     }
 
     async function submit(form) {
-        // Validation côté front avant tout envoi réseau
-        // Si invalide : on rejette la promesse, PollForm récupère l'erreur dans son catch
         if (!validate(form)) {
-            return Promise.reject(errors);
+            throw formErrors;
         }
 
-        submitting.value = true; // désactive le bouton "Créer" pendant l'envoi
-        clearErrors();
-
-        // Construit le payload à envoyer à l'API :
+        submitting.value = true;
+        clearformErrors();
 
         const payload = {
             question: form.question.normalize("NFC"),
@@ -61,7 +58,6 @@ export function usePollForm(pollId = null) {
         };
 
         try {
-            // Envoie POST ou PUT et retourne le poll
             const poll = await fetchApi({
                 url: isEdit ? `/polls/${pollId}` : "/polls",
                 method: isEdit ? "PUT" : "POST",
@@ -69,13 +65,12 @@ export function usePollForm(pollId = null) {
             });
             return poll;
         } catch (err) {
-            errors._global = err.data?.message ?? "Une erreur est survenue.";
-            return Promise.reject(errors);
+            globalError.value = err.data?.message ?? "Une erreur est survenue.";
+            throw globalError;
         } finally {
-            // Toujours exécuté^ : réactive le bouton
             submitting.value = false;
         }
     }
 
-    return { errors, submitting, validate, submit, isEdit };
+    return { formErrors, globalError, submitting, validate, submit, isEdit };
 }

@@ -43,13 +43,14 @@ function buildInitialForm() {
 const form = ref(buildInitialForm());
 
 const pollId = props.poll?.id ?? null;
-const { errors, submitting, validate, submit, isEdit } = usePollForm(pollId);
+const { formErrors, globalError, submitting, validate, submit, isEdit } =
+    usePollForm(pollId);
 
 // watch pour la validation live — { deep: true } surveille les propriétés imbriquées
 watch(
     form,
     () => {
-        if (Object.keys(errors).length > 0) {
+        if (Object.keys(formErrors.value).length > 0) {
             validate(form.value);
         }
     },
@@ -100,10 +101,10 @@ async function handleSubmit() {
                 rows="3"
                 placeholder="Ex : Quel est votre langage préféré ?"
                 class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                :class="{ 'border-red-400': errors.question }"
+                :class="{ 'border-red-400': formErrors.question }"
             ></textarea>
-            <p v-if="errors.question" class="mt-1 text-xs text-red-600">
-                {{ errors.question }}
+            <p v-if="formErrors.question" class="mt-1 text-xs text-red-600">
+                {{ formErrors.question }}
             </p>
         </div>
 
@@ -134,8 +135,8 @@ async function handleSubmit() {
                     @remove="removeOption"
                 />
             </div>
-            <p v-if="errors.options" class="mt-1 text-xs text-red-600">
-                {{ errors.options }}
+            <p v-if="formErrors.options" class="mt-1 text-xs text-red-600">
+                {{ formErrors.options }}
             </p>
             <button
                 v-if="form.options.length < 20"
@@ -198,8 +199,8 @@ async function handleSubmit() {
             </div>
         </fieldset>
         <!-- errors -->
-        <p v-if="errors._global" class="text-sm text-red-600">
-            {{ errors._global }}
+        <p v-if="globalError" class="text-sm text-red-600">
+            {{ globalError }}
         </p>
 
         <!-- Soumission -->
