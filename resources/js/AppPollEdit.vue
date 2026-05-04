@@ -1,8 +1,9 @@
 <script setup>
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import PollForm from "./components/PollForm.vue";
 import ShareLink from "./components/ShareLink.vue";
 import { useFetchApi } from "./composables/useFetchApi";
+import { usePollStatus } from "./composables/usePollStatus";
 
 const props = defineProps({
     poll: { type: Object, default: null },
@@ -12,33 +13,11 @@ const props = defineProps({
 //définis si la page est en mode edit ou create
 const isEdit = !!props.poll;
 
-// par défaut true si pas de poll
-const isDraft = computed(() => props.poll?.is_draft ?? true);
+// ref wrapper pour que le composable puisse y accéder de manière réactive
+const pollRef = ref(props.poll);
 
-const isRunning = computed(() => {
-    if (!props.poll?.started_at) return false;
-    return new Date(props.poll.started_at) <= new Date();
-});
-
-const isExpired = computed(() => {
-    if (!props.poll?.ends_at) return false;
-    return new Date(props.poll.ends_at) <= new Date();
-});
-
-const statusLabel = computed(() => {
-    if (isDraft.value) return "Brouillon";
-    if (isExpired.value) return "Terminé";
-    if (isRunning.value) return "En cours";
-    return "Inconnu";
-});
-
-//return classes tw pour le badge de statut, en fonction du statut du sondage
-const statusClass = computed(() => {
-    if (isDraft.value) return "bg-gray-100 text-gray-700 ring-gray-300";
-    if (isExpired.value) return "bg-red-100 text-red-700 ring-red-300";
-    if (isRunning.value) return "bg-green-100 text-green-700 ring-green-300";
-    return "bg-gray-100 text-gray-700";
-});
+// Centralise les computed de statut 
+const { isDraft, statusLabel, statusClass } = usePollStatus(pollRef);
 
 const { fetchApi } = useFetchApi("/api/v1");
 const launching = ref(false);

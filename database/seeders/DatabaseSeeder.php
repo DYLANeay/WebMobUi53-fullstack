@@ -9,231 +9,182 @@ use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::transaction(
-            function () {
-                // Insert John Doe into the users table
-                DB::table('users')->insert([
+        DB::transaction(function () {
+            // ============================================================
+            // 1. USERS (2 users)
+            // ============================================================
+            DB::table('users')->insert([
+                [
                     'id' => 1,
                     'first_name' => 'John',
                     'last_name' => 'Doe',
                     'username' => 'johndoe',
                     'email' => 'john.doe@example.com',
                     'password' => Hash::make('password'),
-                    'created_at' => new \DateTime('2026-02-09 10:00:00'),
-                    'updated_at' => new \DateTime('2026-02-09 10:00:00'),
-                ]);
-
-                // Insert Jane Doe into the users table
-                DB::table('users')->insert([
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
                     'id' => 2,
                     'first_name' => 'Jane',
                     'last_name' => 'Doe',
                     'username' => 'janedoe',
                     'email' => 'jane.doe@example.com',
                     'password' => Hash::make('password'),
-                    'created_at' => new \DateTime('2026-02-09 11:00:00'),
-                    'updated_at' => new \DateTime('2026-02-09 11:00:00'),
-                ]);
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]);
 
-                // Insert some posts for John Doe
-                DB::table('posts')->insert([
-                    [
-                        'id' => 1,
-                        'user_id' => 1,
-                        'title' => "John's First Post",
-                        'content' => "This is the content of John's first post.",
-                        'created_at' => new \DateTime('2026-02-09 12:00:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:00:00'),
-                    ],
-                    [
-                        'id' => 2,
-                        'user_id' => 1,
-                        'title' => null,
-                        'content' => "This is the content of John's second post.",
-                        'created_at' => new \DateTime('2026-02-09 12:05:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:05:00'),
-                    ],
-                    [
-                        'id' => 3,
-                        'user_id' => 1,
-                        'title' => null,
-                        'content' => "This is the content of John's third post.",
-                        'created_at' => new \DateTime('2026-02-09 12:10:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:10:00'),
-                    ]
-                ]);
+            // ============================================================
+            // 2. POLLS (30 polls — mix de brouillons, en cours, expirés)
+            // ============================================================
+            $pollTemplates = [
+                ['Technologie', 'Quel est votre langage de programmation préféré ?', ['PHP', 'JavaScript', 'Python', 'Rust', 'Go', 'Java']],
+                ['Alimentation', 'Quelle cuisine du monde préférez-vous ?', ['Japonaise', 'Italienne', 'Mexicaine', 'Indienne', 'Thaïlandaise', 'Française']],
+                ['Sport', 'Quel sport pratiquez-vous le plus souvent ?', ['Football', 'Tennis', 'Natation', 'Cyclisme', 'Course à pied', 'Musculation']],
+                ['Musique', 'Quel genre musical écoutez-vous en travaillant ?', ['Jazz', 'Rock', 'Classique', 'Lo-fi', 'Électro', 'Hip-hop']],
+                ['Transport', 'Comment venez-vous au travail ?', ['Voiture', 'Vélo', 'Transports en commun', 'À pied', 'Trottinette', 'Covoiturage']],
+                ['Cinéma', 'Quel genre de film regardez-vous le plus ?', ['Action', 'Comédie', 'Science-fiction', 'Documentaire', 'Horreur', 'Drame']],
+                ['Environnement', 'Comment réduisez-vous votre empreinte carbone ?', ['Vélo / marche', 'Alimentation végétarienne', 'Réduction des déchets', 'Énergies renouvelables', 'Zéro déchet', 'Seconde main']],
+                ['Santé', 'Combien d\'heures dormez-vous par nuit ?', ['Moins de 6h', '6-7h', '7-8h', 'Plus de 8h']],
+                ['Voyage', 'Quelle destination de voyage rêvez-vous visiter ?', ['Japon', 'Islande', 'Nouvelle-Zélande', 'Pérou', 'Norvège', 'Costa Rica']],
+                [null, 'Préférez-vous le café ou le thé ?', ['Café', 'Thé', 'Les deux', 'Aucun']],
+                ['Technologie', 'Quel système d\'exploitation utilisez-vous ?', ['Linux', 'macOS', 'Windows', 'Chrome OS']],
+                ['Lecture', 'Quel genre de livres lisez-vous ?', ['Roman', 'Science-fiction', 'Essai', 'BD / Manga', 'Biographie', 'Policier']],
+                ['Réseaux sociaux', 'Quelle plateforme utilisez-vous le plus ?', ['Instagram', 'Twitter/X', 'TikTok', 'LinkedIn', 'Bluesky', 'Mastodon']],
+                [null, 'Travaillez-vous mieux le matin ou le soir ?', ['Matin', 'Soir', 'Ça dépend', 'Je suis toujours productif']],
+                ['Animaux', 'Avez-vous un animal de compagnie ?', ['Chat', 'Chien', 'Poisson', 'Oiseau', 'Rongeur', 'Aucun']],
+                ['Jeux vidéo', 'Sur quelle plateforme jouez-vous ?', ['PC', 'PlayStation', 'Nintendo Switch', 'Xbox', 'Mobile', 'VR']],
+                ['Gastronomie', 'Quel repas de la journée préférez-vous ?', ['Petit-déjeuner', 'Déjeuner', 'Dîner', 'Le goûter']],
+                ['Mode', 'Quel style vestimentaire adoptez-vous au quotidien ?', ['Casual', 'Sportswear', 'Formel', 'Streetwear', 'Minimaliste', 'Vintage']],
+                ['Éducation', 'Quelle méthode d\'apprentissage préférez-vous ?', ['Vidéos en ligne', 'Livres', 'Pratique directe', 'Cours en présentiel', 'Mentorat', 'Documentation']],
+                ['Loisirs', 'Comment passez-vous votre temps libre ?', ['Sport', 'Jeux vidéo', 'Lecture', 'Sorties / voyages', 'Bricolage', 'Bénévolat']],
+                ['Finance', 'Comment gérez-vous votre budget ?', ['Excel / Sheets', 'App dédiée', 'Mémoire', 'Enveloppe', 'Aucune méthode', 'Comptable']],
+                ['Télétravail', 'Combien de jours par semaine en télétravail ?', ['0 (présentiel)', '1-2 jours', '3 jours', '4 jours', '100 % télétravail', 'Freelance']],
+                ['Mobilité', 'Quel est votre prochain achat tech ?', ['Smartphone', 'Ordinateur', 'Tablette', 'Montre connectée', 'Casque audio', 'Aucun']],
+                ['Climat', 'Quelle saison préférez-vous ?', ['Printemps', 'Été', 'Automne', 'Hiver']],
+                ['Productivité', 'Quel outil de productivité utilisez-vous ?', ['Notion', 'Trello', 'Todoist', 'Obsidian', 'Papier + stylo', 'Aucun']],
+                ['Web', 'Quel framework web préférez-vous ?', ['Laravel', 'Django', 'Rails', 'Express', 'Spring Boot', 'ASP.NET']],
+                ['Design', 'Quel logiciel de design utilisez-vous ?', ['Figma', 'Adobe XD', 'Sketch', 'Photoshop', 'Illustrator', 'Canva']],
+                ['Bien-être', 'Quelle activité pour vous détendre ?', ['Méditation', 'Yoga', 'Marche', 'Musique', 'Lecture', 'Netflix']],
+                ['Crypto', 'Possédez-vous des cryptomonnaies ?', ['Bitcoin', 'Ethereum', 'Solana', 'Aucune', 'Plusieurs', 'Stablecoins uniquement']],
+                ['Voiture', 'Quel type de motorisation pour votre prochaine voiture ?', ['Électrique', 'Hybride', 'Essence', 'Diesel', 'Hydrogène', 'Pas de voiture']],
+            ];
 
-                // Insert some posts for Jane Doe
-                DB::table('posts')->insert([
-                    [
-                        'id' => 4,
-                        'user_id' => 2,
-                        'title' => null,
-                        'content' => "This is the content of Jane's first post.",
-                        'created_at' => new \DateTime('2026-02-09 12:05:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:05:00'),
-                    ],
-                    [
-                        'id' => 5,
-                        'user_id' => 2,
-                        'title' => "Jane's Second Post",
-                        'content' => "This is the content of Jane's second post.",
-                        'created_at' => new \DateTime('2026-02-09 12:10:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:10:00'),
-                    ],
-                    [
-                        'id' => 6,
-                        'user_id' => 2,
-                        'title' => "Jane's Third Post",
-                        'content' => "This is the content of Jane's third post.",
-                        'created_at' => new \DateTime('2026-02-09 12:15:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:15:00'),
-                    ]
-                ]);
+            $pollIds = [];
+            foreach ($pollTemplates as $idx => [$title, $question, $options]) {
+                $isDraft = $idx < 3;                         // 3 brouillons
+                $allowMultiple = ($idx % 5 === 0);           // 1 sur 5 = choix multiple
+                $allowChange = ($idx % 7 === 0);             // 1 sur 7 = vote changeable
+                $resultsPublic = ($idx % 3 !== 0);           // 2 sur 3 = résultats publics
+                $duration = ($idx % 4 === 0) ? ($idx + 1) * 1800 : null;
 
-                // Insert some likes for John's posts
-                DB::table('likes')->insert([
-                    [
-                        'user_id' => 2,
-                        'post_id' => 1,
-                        'reaction' => 'like',
-                        'created_at' => new \DateTime('2026-02-09 12:20:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:20:00'),
-                    ],
-                    [
-                        'user_id' => 1, // John likes his own post
-                        'post_id' => 2,
-                        'reaction' => 'love',
-                        'created_at' => new \DateTime('2026-02-09 12:25:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:25:00'),
-                    ],
-                ]);
-
-                // Insert some likes for Jane's posts
-                DB::table('likes')->insert([
-                    [
-                        'user_id' => 1,
-                        'post_id' => 4,
-                        'reaction' => 'like',
-                        'created_at' => new \DateTime('2026-02-09 12:30:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:30:00'),
-                    ],
-                    [
-                        'user_id' => 1,
-                        'post_id' => 5,
-                        'reaction' => 'love',
-                        'created_at' => new \DateTime('2026-02-09 12:35:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:35:00'),
-                    ],
-                    [
-                        'user_id' => 2, // Jane likes her own post
-                        'post_id' => 5,
-                        'reaction' => 'wow',
-                        'created_at' => new \DateTime('2026-02-09 12:40:00'),
-                        'updated_at' => new \DateTime('2026-02-09 12:40:00'),
-                    ]
-                ]);
-
-                $polls = [
-                    [1, 1, 'Technologie', 'Quel est votre langage de programmation préféré ?', true,  false, false, false, null,  null, null, '2026-04-19 10:00:00'],
-                    [2, 1, 'Alimentation', 'Quelle cuisine du monde préférez-vous ?',           false, false, false, true,  null,  '2026-04-19 11:00:00', null, '2026-04-19 11:00:00'],
-                    [3, 1, 'Sport', 'Quel sport pratiquez-vous le plus souvent ?',               false, true,  false, true,  3600,  '2026-04-20 09:00:00', '2026-04-20 10:00:00', '2026-04-20 09:00:00'],
-                    [4, 1, 'Musique', 'Quel genre musical écoutez-vous en travaillant ?',        true,  false, false, false, null,  null, null, '2026-04-20 10:00:00'],
-                    [5, 1, 'Transport', 'Comment venez-vous au travail ?',                       false, true,  true,  true,  7200,  '2026-04-21 08:00:00', '2026-04-21 10:00:00', '2026-04-21 08:00:00'],
-                    [6, 1, 'Cinéma', 'Quel genre de film regardez-vous le plus ?',               false, false, false, true,  null,  '2026-04-21 12:00:00', null, '2026-04-21 12:00:00'],
-                    [7, 1, 'Environnement', 'Comment réduisez-vous votre empreinte carbone ?',   true,  true,  false, false, null,  null, null, '2026-04-22 09:00:00'],
-                    [8, 1, 'Santé', 'Combien d\'heures dormez-vous par nuit ?',                  false, false, false, true,  null,  '2026-04-22 10:00:00', null, '2026-04-22 10:00:00'],
-                    [9, 1, 'Voyage', 'Quelle destination de voyage rêvez-vous visiter ?',        false, false, true,  false, 86400, '2026-04-23 00:00:00', '2026-04-24 00:00:00', '2026-04-23 00:00:00'],
-                    [10, 1, null, 'Préférez-vous le café ou le thé ?',                           false, false, false, true,  null,  '2026-04-23 08:00:00', null, '2026-04-23 08:00:00'],
-                    [11, 2, 'Technologie', 'Quel système d\'exploitation utilisez-vous ?',       false, false, false, true,  null,  '2026-04-19 14:00:00', null, '2026-04-19 14:00:00'],
-                    [12, 2, 'Lecture', 'Quel genre de livres lisez-vous ?',                      true,  true,  false, false, null,  null, null, '2026-04-20 09:00:00'],
-                    [13, 2, 'Réseaux sociaux', 'Quelle plateforme utilisez-vous le plus ?',      false, false, false, true,  3600,  '2026-04-20 15:00:00', '2026-04-20 16:00:00', '2026-04-20 15:00:00'],
-                    [14, 2, null, 'Travaillez-vous mieux le matin ou le soir ?',                 false, false, true,  true,  null,  '2026-04-21 10:00:00', null, '2026-04-21 10:00:00'],
-                    [15, 2, 'Animaux', 'Avez-vous un animal de compagnie ?',                     true,  false, false, false, null,  null, null, '2026-04-22 11:00:00'],
-                    [16, 2, 'Jeux vidéo', 'Sur quelle plateforme jouez-vous ?',                  false, true,  false, true,  null,  '2026-04-22 14:00:00', null, '2026-04-22 14:00:00'],
-                    [17, 2, 'Gastronomie', 'Quel repas de la journée préférez-vous ?',           false, false, false, true,  null,  '2026-04-23 09:00:00', null, '2026-04-23 09:00:00'],
-                    [18, 2, 'Mode', 'Quel style vestimentaire adoptez-vous au quotidien ?',      true,  true,  false, false, null,  null, null, '2026-04-23 10:00:00'],
-                    [19, 1, 'Éducation', 'Quelle méthode d\'apprentissage préférez-vous ?',      false, false, false, true,  7200,  '2026-04-24 10:00:00', '2026-04-24 12:00:00', '2026-04-24 10:00:00'],
-                    [20, 2, 'Loisirs', 'Comment passez-vous votre temps libre ?',                false, true,  true,  true,  null,  '2026-04-24 14:00:00', null, '2026-04-24 14:00:00'],
-                ];
-
-                foreach ($polls as [$id, $userId, $title, $question, $isDraft, $allowMultiple, $allowChange, $resultsPublic, $duration, $startedAt, $endsAt, $createdAt]) {
-                    DB::table('polls')->insert([
-                        'id'                    => $id,
-                        'user_id'               => $userId,
-                        'title'                 => $title,
-                        'question'              => $question,
-                        'secret_token'          => Str::random(32),
-                        'is_draft'              => $isDraft,
-                        'allow_multiple_choices'=> $allowMultiple,
-                        'allow_vote_change'     => $allowChange,
-                        'results_public'        => $resultsPublic,
-                        'duration'              => $duration,
-                        'started_at'            => $startedAt,
-                        'ends_at'               => $endsAt,
-                        'created_at'            => new \DateTime($createdAt),
-                        'updated_at'            => new \DateTime($createdAt),
-                    ]);
+                if ($isDraft) {
+                    $startedAt = null;
+                    $endsAt = null;
+                } else {
+                    $startedAt = now()->subDays(rand(1, 10))->subHours(rand(0, 23));
+                    $endsAt = $duration
+                        ? (clone $startedAt)->addSeconds($duration)
+                        : null;
                 }
 
-                $options = [
-                    // Poll 1 - langages
-                    [1, 'PHP'], [1, 'JavaScript'], [1, 'Python'], [1, 'Rust'],
-                    // Poll 2 - cuisine
-                    [2, 'Japonaise'], [2, 'Italienne'], [2, 'Mexicaine'], [2, 'Indienne'],
-                    // Poll 3 - sport
-                    [3, 'Football'], [3, 'Tennis'], [3, 'Natation'], [3, 'Cyclisme'],
-                    // Poll 4 - musique
-                    [4, 'Jazz'], [4, 'Rock'], [4, 'Classique'], [4, 'Lo-fi'],
-                    // Poll 5 - transport
-                    [5, 'Voiture'], [5, 'Vélo'], [5, 'Transports en commun'], [5, 'À pied'],
-                    // Poll 6 - cinéma
-                    [6, 'Action'], [6, 'Comédie'], [6, 'Science-fiction'], [6, 'Documentaire'],
-                    // Poll 7 - environnement
-                    [7, 'Vélo / marche'], [7, 'Alimentation végétarienne'], [7, 'Réduction des déchets'], [7, 'Énergies renouvelables'],
-                    // Poll 8 - sommeil
-                    [8, 'Moins de 6h'], [8, '6-7h'], [8, '7-8h'], [8, 'Plus de 8h'],
-                    // Poll 9 - voyage
-                    [9, 'Japon'], [9, 'Islande'], [9, 'Nouvelle-Zélande'], [9, 'Pérou'],
-                    // Poll 10 - café/thé
-                    [10, 'Café'], [10, 'Thé'],
-                    // Poll 11 - OS
-                    [11, 'Linux'], [11, 'macOS'], [11, 'Windows'],
-                    // Poll 12 - lecture
-                    [12, 'Roman'], [12, 'Science-fiction'], [12, 'Essai'], [12, 'BD / Manga'],
-                    // Poll 13 - réseaux sociaux
-                    [13, 'Instagram'], [13, 'Twitter/X'], [13, 'TikTok'], [13, 'LinkedIn'],
-                    // Poll 14 - matin/soir
-                    [14, 'Matin'], [14, 'Soir'],
-                    // Poll 15 - animaux
-                    [15, 'Chat'], [15, 'Chien'], [15, 'Autre'], [15, 'Aucun'],
-                    // Poll 16 - jeux vidéo
-                    [16, 'PC'], [16, 'PlayStation'], [16, 'Nintendo Switch'], [16, 'Mobile'],
-                    // Poll 17 - repas
-                    [17, 'Petit-déjeuner'], [17, 'Déjeuner'], [17, 'Dîner'],
-                    // Poll 18 - mode
-                    [18, 'Casual'], [18, 'Sportswear'], [18, 'Formel'], [18, 'Streetwear'],
-                    // Poll 19 - apprentissage
-                    [19, 'Vidéos en ligne'], [19, 'Livres'], [19, 'Pratique directe'], [19, 'Cours en présentiel'],
-                    // Poll 20 - loisirs
-                    [20, 'Sport'], [20, 'Jeux vidéo'], [20, 'Lecture'], [20, 'Sorties / voyages'],
-                ];
+                $pollId = DB::table('polls')->insertGetId([
+                    'user_id' => ($idx % 2 === 0) ? 1 : 2,
+                    'title' => $title,
+                    'question' => $question,
+                    'secret_token' => Str::random(32),
+                    'is_draft' => $isDraft,
+                    'allow_multiple_choices' => $allowMultiple,
+                    'allow_vote_change' => $allowChange,
+                    'results_public' => $resultsPublic,
+                    'duration' => $duration,
+                    'started_at' => $startedAt,
+                    'ends_at' => $endsAt,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-                $now = new \DateTime('2026-04-19 10:00:00');
-                foreach ($options as [$pollId, $label]) {
-                    DB::table('poll_options')->insert([
-                        'poll_id'    => $pollId,
-                        'label'      => $label,
-                        'created_at' => $now,
-                        'updated_at' => $now,
+                $pollIds[$pollId] = $options;
+            }
+
+            // ============================================================
+            // 3. OPTIONS (toutes les options de tous les polls)
+            // ============================================================
+            $optionIdsByPoll = [];
+            foreach ($pollIds as $pollId => $optionLabels) {
+                foreach ($optionLabels as $label) {
+                    $optionId = DB::table('poll_options')->insertGetId([
+                        'poll_id' => $pollId,
+                        'label' => $label,
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
+                    $optionIdsByPoll[$pollId][] = $optionId;
                 }
             }
-        );
+
+            // ============================================================
+            // 4. VOTES (~800 votes répartis sur les polls lancés)
+            // ============================================================
+            $launchedPollIds = DB::table('polls')
+                ->where('is_draft', false)
+                ->pluck('id')
+                ->toArray();
+
+            $votes = [];
+            $voteCount = 0;
+            $maxVotes = 800;
+
+            for ($v = 0; $v < $maxVotes; $v++) {
+                $pollId = $launchedPollIds[array_rand($launchedPollIds)];
+                $availableOptions = $optionIdsByPoll[$pollId];
+
+                // Choix unique : 1 option. Choix multiple : 1 à 3 options.
+                $poll = DB::table('polls')->where('id', $pollId)->first();
+                $numChoices = $poll->allow_multiple_choices
+                    ? rand(1, min(3, count($availableOptions)))
+                    : 1;
+
+                $chosenOptions = array_rand(array_flip($availableOptions), $numChoices);
+                $chosenOptions = is_array($chosenOptions)
+                    ? $chosenOptions
+                    : [$chosenOptions];
+
+                foreach ($chosenOptions as $optionId) {
+                    // Vérifier unicité pour les sondages en choix unique
+                    if (! $poll->allow_multiple_choices) {
+                        $alreadyExists = DB::table('poll_votes')
+                            ->where('poll_id', $pollId)
+                            ->where('user_id', 1)
+                            ->exists();
+                        if ($alreadyExists) {
+                            continue;
+                        }
+                    }
+
+                    $votes[] = [
+                        'poll_id' => $pollId,
+                        'user_id' => ($v % 2 === 0) ? 1 : 2,
+                        'poll_option_id' => $optionId,
+                        'created_at' => now()->subMinutes(rand(0, 1440)),
+                        'updated_at' => now()->subMinutes(rand(0, 1440)),
+                    ];
+
+                    $voteCount++;
+                    if ($voteCount >= $maxVotes) {
+                        break 2;
+                    }
+                }
+            }
+
+            // Insert par chunks pour éviter de dépasser les limites SQL
+            foreach (array_chunk($votes, 200) as $chunk) {
+                DB::table('poll_votes')->insert($chunk);
+            }
+        });
     }
 }

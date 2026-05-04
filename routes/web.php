@@ -6,6 +6,7 @@ use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\PollCreateController;
 use App\Http\Controllers\PollDashboardController;
 use App\Http\Controllers\PollEditController;
+use App\Http\Controllers\PollShowController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TokenController;
@@ -64,3 +65,6 @@ Route::middleware("auth")->group(function () {
     ]);
     Route::post("/auth/logout", [AuthController::class, "logout"]);
 });
+
+// at the end so that /polls/dashboard, /polls/create, etc. are matched first.
+Route::get("/polls/{token}", PollShowController::class)->name("polls.show");
