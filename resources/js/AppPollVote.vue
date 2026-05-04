@@ -166,7 +166,7 @@ function getPercentage(option) {
                 </div>
             </form>
 
-            <!-- Results shown after voting (or if results are public) -->
+            <!-- show results -->
             <div
                 v-if="success || poll.results_public"
                 class="space-y-4 pt-6 border-t border-gray-200"
@@ -201,12 +201,11 @@ function getPercentage(option) {
             </div>
         </div>
 
-        <!-- Fallback: not started yet -->
         <div
             v-else
             class="rounded-md bg-gray-50 p-4 text-sm text-gray-700 ring-1 ring-inset ring-gray-200"
         >
-            Ce sondage n'a pas encore demarre.
+            Ce sondage n'a pas encore démarré.
         </div>
     </main>
 </template>
