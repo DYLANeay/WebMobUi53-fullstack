@@ -6,6 +6,7 @@ use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\PollCreateController;
 use App\Http\Controllers\PollDashboardController;
 use App\Http\Controllers\PollEditController;
+use App\Http\Controllers\PollShowController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TokenController;
@@ -32,6 +33,9 @@ Route::get("/@{username}", [ProfileController::class, "show"])->where(
 );
 
 Route::resource("posts", PostController::class)->only(["index", "show"]);
+
+//without middleware auth, since some1 can see the poll even if they are not authenticated, but they cannot vote if they are not authenticated
+Route::get("/polls/{token}", PollShowController::class)->name("polls.show");
 
 Route::controller(AuthController::class)->group(function () {
     Route::get("/auth/register", "showRegister");
