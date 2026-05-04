@@ -25,12 +25,12 @@ export function usePollVote() {
 
     async function submit(token, allowMultiple) {
         if (selectedOptions.value.length === 0) {
-            error.value = "Veuillez selectionner au moins une option.";
+            error.value = "Veuillez sélectionner au moins une option.";
             return;
         }
 
         if (!allowMultiple && selectedOptions.value.length > 1) {
-            error.value = "Vous ne pouvez selectionner qu'une seule option.";
+            error.value = "Vous ne pouvez sélectionner qu'une seule option.";
             return;
         }
 
@@ -55,7 +55,7 @@ export function usePollVote() {
                 error.value =
                     err.data?.message ?? "Ce sondage n'est pas accessible.";
             } else if (err.status === 422) {
-                error.value = err.data?.message ?? "Donnees invalides.";
+                error.value = err.data?.message ?? "Données invalides.";
             } else {
                 error.value = "Une erreur est survenue lors du vote.";
             }
