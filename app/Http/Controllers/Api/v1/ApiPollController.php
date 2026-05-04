@@ -69,6 +69,35 @@ class ApiPollController extends Controller
     }
 
     /**
+     * Start the specified poll (owner only).
+     */
+    public function start(Request $request, Poll $poll)
+    {
+        if ($poll->user_id !== $request->user()->id) {
+            return response()->json(["message" => "Unauthorized."], 403);
+        }
+
+        if (!$poll->is_draft) {
+            return response()->json(
+                ["message" => "Poll is already started."],
+                409,
+            );
+        }
+
+        $poll->is_draft = false;
+        $poll->started_at = now();
+
+        if ($poll->duration) {
+            $poll->ends_at = now()->addSeconds($poll->duration);
+        }
+
+        $poll->save();
+
+        // recharge les options pour retourner le poll complet
+        return response()->json($poll->load("options"));
+    }
+
+    /**
      * Display the specified poll by its secret token.
      */
     public function show(string $token)
@@ -132,12 +161,12 @@ class ApiPollController extends Controller
         ]);
         // Detecte les options a supprimer (presentes en base mais absentes du payload)
         $existingIds = $poll->options()->pluck("id")->toArray();
-        //send by front
+        // send by front
         $payloadIds = collect($validated["options"])
             ->pluck("id")
             ->filter()
             ->toArray();
-        //id des options existantes en bdd
+        // id des options existantes en bdd
         $toDelete = array_diff($existingIds, $payloadIds);
 
         DB::transaction(function () use ($validated, $poll, $toDelete) {
@@ -152,7 +181,7 @@ class ApiPollController extends Controller
                 "duration" => $validated["duration"] ?? null,
             ]);
 
-            //suppr options
+            // suppr options
             if (!empty($toDelete)) {
                 $poll->options()->whereIn("id", $toDelete)->delete();
             }
@@ -171,7 +200,7 @@ class ApiPollController extends Controller
             }
         });
 
-        //recharge le poll avec les options mises a jour
+        // recharge le poll avec les options mises a jour
         return response()->json($poll->load("options"));
     }
 }
