@@ -2,6 +2,8 @@
 import { computed, ref } from "vue";
 import { usePollVote } from "./composables/usePollVote";
 import { usePollStatus } from "./composables/usePollStatus";
+import { usePolling } from "./composables/usePolling";
+import { useFetchApi } from "./composables/useFetchApi";
 
 const props = defineProps({
     poll: { type: Object, required: true },
@@ -75,6 +77,31 @@ function getPercentage(option) {
     if (totalVotes.value === 0) return 0;
     return Math.round(((option.votes_count || 0) / totalVotes.value) * 100);
 }
+
+const { fetchApi } = useFetchApi("/api/v1");
+
+async function refreshResults() {
+    // Brouillon ou fini => pas besoin de rafraîchir
+    if (isDraft.value || isExpired.value) return;
+
+    try {
+        const data = await fetchApi({
+            url: `/polls/${poll.value.secret_token}/results`,
+        });
+        // L'API renvoie les options
+        // On remplace l'array des options, vue rerender
+        // les barres / le total via le computed totalVotes
+        poll.value.options = data.options;
+    } catch (e) {
+        console.error(
+            "Erreur en rafraîchissant les résultats :",
+            e,
+            " on reessayera au prochain intervalle",
+        );
+    }
+}
+
+usePolling(refreshResults, 5000);
 </script>
 
 <template>
