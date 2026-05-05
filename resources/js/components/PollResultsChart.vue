@@ -59,8 +59,8 @@ const chartOptions = {
 </script>
 
 <template>
-    <!-- on contraint la hauteur sur le wrapper -->
-    <div class="h-72">
+    <!-- fixed height -->
+    <div class="h-56 sm:h-72">
         <Bar :data="chartData" :options="chartOptions" />
     </div>
 </template>

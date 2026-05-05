@@ -193,7 +193,7 @@ async function handleSubmit() {
                         min="60"
                         max="604800"
                         placeholder="Ex : 3600"
-                        class="mt-1 block w-40 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        class="mt-1 block w-full sm:w-40 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     />
                 </div>
             </div>
