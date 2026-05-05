@@ -1,7 +1,7 @@
 <script setup>
 // defineModel se déclare dans l'enfant, et se lie par nom de model
 // implicitement "modelValue", mais on peut aussi lui donner un nom personnalisé (rien à voir), ici "open"
-const open = defineModel("open", { type: Boolean, required: true });
+const open = defineModel({ type: Boolean, required: true });
 
 defineProps({
     title: { type: String, default: "Confirmer" },
