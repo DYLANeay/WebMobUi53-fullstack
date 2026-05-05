@@ -14,6 +14,7 @@ const { message, type, visible, dismiss } = useFlash();
             leave-from-class="translate-y-0 opacity-100"
             leave-to-class="translate-y-4 opacity-0"
         >
+            <!-- c'est ce v-if qui dicte si le toast est visible -->
             <div
                 v-if="visible"
                 class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 w-max max-w-sm px-4 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-3"

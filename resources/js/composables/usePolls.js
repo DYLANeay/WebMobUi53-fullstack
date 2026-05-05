@@ -1,28 +1,26 @@
 import { ref } from "vue";
 import { useFetchApi } from "./useFetchApi";
+import { useFlash } from "./useFlash";
 
-/**
- * Composable de gestion de la liste des sondages de l'utilisateur connecté.
- *
- * @param {Array} initialPolls - liste initiale (eager-loadée depuis Blade)
- */
 export function usePolls(initialPolls = []) {
     const polls = ref([...initialPolls]);
     const error = ref(null);
 
     const { fetchApi } = useFetchApi();
+    const { flash } = useFlash();
 
     async function remove(id) {
-        //delete de l'interface
         const previous = polls.value;
         polls.value = polls.value.filter((p) => p.id !== id);
         error.value = null;
-        //delete de la db
         try {
             await fetchApi({ url: `/polls/${id}`, method: "DELETE" });
+            flash("Sondage supprimé.", "success");
         } catch (err) {
             polls.value = previous;
-            error.value = err?.data?.message || "Suppression impossible.";
+            const msg = err?.data?.message || "Suppression impossible.";
+            error.value = msg;
+            flash(msg, "error");
         }
     }
 
