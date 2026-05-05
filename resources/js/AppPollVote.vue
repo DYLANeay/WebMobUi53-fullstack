@@ -138,7 +138,7 @@ function getPercentage(option) {
                 v-if="success"
                 class="rounded-md bg-green-50 p-4 text-sm text-green-800 ring-1 ring-inset ring-green-200"
             >
-                Merci d'avoir vote !
+                Merci d'avoir voté !
             </div>
 
             <div
