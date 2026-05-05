@@ -71,7 +71,7 @@ function goEdit(poll) {
         <!-- @confirm qui est déclenché quand l'utilisateur confirme la suppression, on appelle la fonction confirmDelete -->
         <!-- //si l'utilisateur annule, on ne fait rien donc pas besoin de gérer l'événement cancel -->
         <ConfirmModal
-            v-model:open="confirmOpen"
+            v-model="confirmOpen"
             title="Supprimer le sondage"
             :message="
                 pollToDelete

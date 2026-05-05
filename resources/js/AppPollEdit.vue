@@ -2,16 +2,18 @@
 import { ref } from "vue";
 import PollForm from "./components/PollForm.vue";
 import ShareLink from "./components/ShareLink.vue";
+import FlashToast from "./components/FlashToast.vue";
 import { useFetchApi } from "./composables/useFetchApi";
 import { usePollStatus } from "./composables/usePollStatus";
+import { useFlash } from "./composables/useFlash";
 
 const props = defineProps({
     poll: { type: Object, default: null },
     dashboardUrl: { type: String, required: true },
 });
 
-//définis si la page est en mode edit ou create
 const isEdit = !!props.poll;
+const { flash } = useFlash();
 
 // ref wrapper pour que le composable puisse y accéder de manière réactive
 const pollRef = ref(props.poll);
@@ -47,12 +49,20 @@ async function launchPoll() {
     }
 }
 
-function onSaved() {
-    window.location.href = props.dashboardUrl;
+function onSaved(poll) {
+    if (isEdit) {
+        flash("Modifications enregistrées.", "success");
+    } else {
+        flash("Sondage créé !", "success");
+        setTimeout(() => {
+            window.location.href = `/polls/${poll.id}/edit`;
+        }, 1500);
+    }
 }
 </script>
 
 <template>
+    <FlashToast />
     <main class="mx-auto max-w-2xl p-4 sm:p-6">
         <header class="mb-6">
             <a
@@ -98,21 +108,19 @@ function onSaved() {
 
             <!-- Récapitulatif des paramètres, dl = definition list -->
             <dl class="mt-4 space-y-1 text-sm text-indigo-800">
-                <div class="flex gap-2">
-                    <!-- dt = definition term -->
+                <div class="flex flex-col sm:flex-row sm:gap-2">
                     <dt class="font-medium">Choix multiples :</dt>
-                    <!--  dt = definition description -->
                     <dd>{{ poll.allow_multiple_choices ? "Oui" : "Non" }}</dd>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row sm:gap-2">
                     <dt class="font-medium">Modification du vote :</dt>
                     <dd>{{ poll.allow_vote_change ? "Oui" : "Non" }}</dd>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row sm:gap-2">
                     <dt class="font-medium">Résultats publics :</dt>
                     <dd>{{ poll.results_public ? "Oui" : "Non" }}</dd>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row sm:gap-2">
                     <dt class="font-medium">Durée :</dt>
                     <dd>
                         {{

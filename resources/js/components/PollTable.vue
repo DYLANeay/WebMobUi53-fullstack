@@ -26,8 +26,8 @@ function formatDate(value) {
                         Question
                     </th>
                     <th class="px-4 py-3 font-medium text-gray-700">Statut</th>
-                    <th class="px-4 py-3 font-medium text-gray-700">Début</th>
-                    <th class="px-4 py-3 font-medium text-gray-700">Fin</th>
+                    <th class="hidden sm:table-cell px-4 py-3 font-medium text-gray-700">Début</th>
+                    <th class="hidden sm:table-cell px-4 py-3 font-medium text-gray-700">Fin</th>
                     <th class="px-4 py-3 text-right font-medium text-gray-700">
                         Actions
                     </th>
@@ -50,10 +50,10 @@ function formatDate(value) {
                     <td class="px-4 py-3">
                         <PollStatusBadge :poll="poll" />
                     </td>
-                    <td class="px-4 py-3 text-gray-600">
+                    <td class="hidden sm:table-cell px-4 py-3 text-gray-600">
                         {{ formatDate(poll.started_at) }}
                     </td>
-                    <td class="px-4 py-3 text-gray-600">
+                    <td class="hidden sm:table-cell px-4 py-3 text-gray-600">
                         {{ formatDate(poll.ends_at) }}
                     </td>
                     <td class="px-4 py-3 text-right">
