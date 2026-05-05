@@ -18,6 +18,8 @@ Route::apiResource("v1/posts", ApiPostController::class)
     ->middlewareFor(["destroy"], ["auth:sanctum", "abilities:posts:delete"]);
 
 Route::get("/v1/polls/{token}", [ApiPollController::class, "show"]);
+// Endpoint public consommé par le polling frontend de la page de vote.
+Route::get("/v1/polls/{token}/results", [ApiPollController::class, "results"]);
 
 Route::middleware("auth:sanctum")->group(function () {
     Route::get("/v1/foo", [ApiFooController::class, "show"]);

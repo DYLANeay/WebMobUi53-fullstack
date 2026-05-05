@@ -118,6 +118,43 @@ class ApiPollController extends Controller
     }
 
     /**
+     * Public results for a poll (counts per option, total, ended state).
+     * Quiconque a le secret_token peut consulter
+     * c'est l'endpoint que le polling frontend (@usePolling) va appeler toutes les 5s.
+     */
+    public function results(string $token)
+    {
+        $poll = Poll::with([
+            "options" => function ($query) {
+                $query->withCount("votes");
+            },
+        ])
+            ->where("secret_token", $token)
+            ->first();
+
+        if (!$poll) {
+            return response()->json(["message" => "Poll not found."], 404);
+        }
+
+        // Somme calculée côté API
+        $totalVotes = $poll->options->sum("votes_count");
+        $hasEnded = $poll->ends_at && now()->greaterThan($poll->ends_at);
+
+        return response()->json([
+            "options" => $poll->options->map(
+                fn($option) => [
+                    "id" => $option->id,
+                    "label" => $option->label,
+                    "votes_count" => $option->votes_count,
+                ],
+            ),
+            "total_votes" => $totalVotes,
+            "has_ended" => $hasEnded,
+            "ends_at" => $poll->ends_at,
+        ]);
+    }
+
+    /**
      * Display the specified poll by id (authenticated owner only).
      */
 
