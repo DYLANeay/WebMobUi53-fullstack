@@ -36,13 +36,11 @@ class Poll extends Model
     ];
 
     // boot() est appelé une seule fois par Eloquent au chargement du modèle.
-    // C'est ici qu'on enregistre des listeners sur les événements du cycle de vie
     protected static function boot(): void
     {
         parent::boot(); // obligatoire,initialise les listeners internes d'Eloquent
 
-        // Déclenché juste avant chaque INSERT — on génère le token de partage public
-        // si aucun n'a été fourni manuellement (cas normal : on n'en passe jamais).
+        // Déclenché juste avant chaque INSERT : on génère le token de partage public
         static::creating(function (Poll $poll) {
             if (empty($poll->secret_token)) {
                 // Boucle de garde : génère un token, vérifie en base qu'aucun poll
