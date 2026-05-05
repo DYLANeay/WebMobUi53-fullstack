@@ -7,5 +7,9 @@
         {{ $poll->question }}
     </x-slot>
 
-    <div id="app" data-props="{{ json_encode(['poll' => $poll]) }}"></div>
+    <div id="app" data-props="{{ json_encode([
+        'poll' => $poll,
+        'hasVoted' => $hasVoted,
+        'votedOptionIds' => $votedOptionIds,
+    ]) }}"></div>
 </x-vue-app-layout>

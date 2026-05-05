@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Poll;
+use App\Models\PollVote;
 use Illuminate\Http\Request;
 
 class PollShowController extends Controller
@@ -21,8 +22,19 @@ class PollShowController extends Controller
             abort(404);
         }
 
+        $votedOptionIds = [];
+        if ($request->user()) {
+            //on récupère les options pour lesquelles l'utilisateur a voté (s'il est connecté)
+            $votedOptionIds = PollVote::where("poll_id", $poll->id)
+                ->where("user_id", $request->user()->id)
+                ->pluck("poll_option_id")
+                ->toArray();
+        }
+        //on retourne la vue avec le poll et les options pour lesquelles l'utilisateur a voté (pour afficher les résultats si il a déjà voté)
         return view("polls.show", [
             "poll" => $poll,
+            "hasVoted" => !empty($votedOptionIds),
+            "votedOptionIds" => $votedOptionIds,
         ]);
     }
 }
