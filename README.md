@@ -1,77 +1,149 @@
-# HEIG-VD DévProdMéd Course - Mini-projet
+# Application de sondage, Dylan Eray - M53-2
 
-Ce dépôt contient le mini-projet à réaliser dans le cadre du cours
-_"[Développement de produit média (DévProdMéd)](https://github.com/heig-vd-devprodmed-course/heig-vd-devprodmed-course)"_
-enseigné à la
-[Haute Ecole d'Ingénierie et de Gestion du Canton de Vaud (HEIG-VD)](https://heig-vd.ch),
-Suisse.
+TP fullstack HEIG-VD WebMobUI - système de sondage multi-plateforme.
 
-## Objectif du mini-projet
+---
 
-L'objectif de ce mini-projet est de créer un réseau social simple en utilisant le
-framework [Laravel](https://laravel.com/). Ce projet permettra de mettre en pratique les concepts
-appris dans le cours.
+## Installation
 
-## Pré-requis
+J'utilise `chart.js` et `vue-chartjs` pour les graphiques (voir [Choix techniques](#choix-techniques)).
 
-Afin de lancer ce projet, une stack compatible avec Laravel, est requise.
+```bash
+npm install
+npm run build
+```
 
-Voici les pré-requis nécessaires :
+---
 
-- PHP >= 8.0.
-- Composer.
-- Node.js et npm.
-- Une base de données (MySQL, PostgreSQL, SQLite, etc.).
-- Un serveur web (Apache, Nginx, etc.).
+## Ce qui a été ajouté au template de départ
 
-[Laravel Herd](https://helm.sh/docs/charts/laravel/) est recommandé pour une installation facile de Laravel et de ses dépendances.
+### Modèles (modifiés)
 
-## Développement local
+| Fichier | Modification |
+|---------|-------------|
+| `app/Models/Poll.php` | J'ai ajouté le hook `boot()` pour générer automatiquement un `secret_token` unique (32 chars) à la création via `Str::random()` avec boucle de garde anti-collision. J'ai aussi ajouté les casts pour les booléens et les dates. |
 
-Pour développer et tester le mini-projet en local, voici les étapes à suivre :
+### Contrôleurs web (ajoutés)
 
-1. Forker ce dépôt
+| Fichier | Rôle |
+|---------|------|
+| `app/Http/Controllers/PollDashboardController.php` | Charge la liste des sondages de l'utilisateur connecté et monte la vue Blade `polls.dashboard`. |
+| `app/Http/Controllers/PollCreateController.php` | Monte la vue Blade `polls.create` (mode création). |
+| `app/Http/Controllers/PollEditController.php` | Charge le sondage par ID (avec vérification de propriété), monte `polls.edit`. |
+| `app/Http/Controllers/PollShowController.php` | Page publique de vote/résultats : charge le sondage par token, les résultats et les votes déjà soumis par l'utilisateur connecté (si applicable). |
 
-2. Installer les dépendances avec npm et Composer :
+### Contrôleurs API (ajoutés)
 
-    ```bash
-    npm install && npm run build
+Tous dans `app/Http/Controllers/Api/v1/`.
 
-    composer install
-    ```
+| Fichier | Endpoints gérés |
+|---------|----------------|
+| `ApiPollController.php` | `GET /v1/polls`, `POST /v1/polls`, `GET /v1/polls/id/{poll}`, `PUT /v1/polls/{poll}`, `POST /v1/polls/{poll}/start`, `DELETE /v1/polls/{poll}`, `GET /v1/polls/{token}`, `GET /v1/polls/{token}/results` |
+| `ApiPollVoteController.php` | `POST /v1/polls/{token}/vote`, `GET /v1/polls/{token}/vote` |
 
-3. Copier le fichier `.env.example` en `.env`.
-4. Modifier les variables d'environnement si nécessaire (optionnel).
-5. Générer la clé d'application Laravel :
+### Routes (modifiées)
 
-    ```bash
-    php artisan key:generate
-    ```
+- `routes/web.php` : ajout des 4 routes de pages sondage (dashboard, create, edit, show publique).
+- `routes/api.php` : ajout des 10 endpoints `/api/v1/polls/...`.
 
-6. Créer le lien symbolique pour les fichiers téléversés :
+### Frontend Vue.js (entièrement ajouté)
 
-    ```bash
-    php artisan storage:link
-    ```
+Tout le frontend est dans `resources/js/`.
 
-7. Créer la base de données et exécuter les migrations :
+---
 
-    ```bash
-    php artisan migrate
-    ```
+## Structure du frontend
 
-    S'il est nécessaire de réinitialiser la base de données, utiliser la commande `php artisan migrate:reset` puis `php artisan migrate` à nouveau.
+### Entrypoints Vite
 
-8. Optionnel : en mode développement, il est possible de peupler la base de données avec des données fictives :
+Chaque page Blade monte sa propre application Vue isolée. Il n'y a pas de routeur SPA, c'est Laravel qui gère le routing.
 
-    ```bash
-    php artisan db:seed
-    ```
+| Fichier | App montée | Page |
+|---------|-----------|------|
+| `poll-dashboard.js` | `AppPollDashboard.vue` | `/polls/dashboard` |
+| `poll-edit.js` | `AppPollEdit.vue` | `/polls/create` et `/polls/{id}/edit` |
+| `poll-vote.js` | `AppPollVote.vue` | `/polls/{token}` |
 
-9. Démarrer le serveur de développement Laravel :
+### Composants (`resources/js/components/`)
 
-    ```bash
-    composer run dev
-    ```
+| Fichier | Rôle |
+|---------|------|
+| `AppPollDashboard.vue` | Container racine du dashboard : charge la liste, gère la suppression avec confirmation. |
+| `AppPollEdit.vue` | Container de création/édition : affiche le formulaire (brouillon), le panneau de lancement, ou le lien de partage selon l'état. |
+| `AppPollVote.vue` | Container de la page publique : formulaire de vote (radio/checkbox), résultats en direct, graphique, gestion de l'expiration. |
+| `PollForm.vue` | Formulaire réutilisable question + options + paramètres. Validation côté client en temps réel. |
+| `PollOptionInput.vue` | Champ de saisie d'une option (avec bouton suppression). Utilise `defineModel`. |
+| `PollTable.vue` | Tableau responsive des sondages du dashboard avec badges de statut et actions. |
+| `PollStatusBadge.vue` | Badge coloré indiquant l'état du sondage (brouillon / en cours / terminé). |
+| `PollResultsChart.vue` | Graphique en barres (Chart.js) des résultats, mis à jour réactivement. |
+| `ShareLink.vue` | Affiche le lien de partage avec bouton copie + toast de confirmation. |
+| `FlashToast.vue` | Notification temporaire (3 s) téléportée dans le `<body>`, avec animation. |
+| `ConfirmModal.vue` | Modale de confirmation réutilisable, téléportée dans le `<body>`. |
 
-L'application sera accessible à l'adresse <http://localhost:8000>.
+### Composables (`resources/js/composables/`)
+
+| Fichier | Rôle |
+|---------|------|
+| `useFetchApi.js` | Client HTTP : `fetch` avec `AbortController`, timeout 5 s, injection automatique du token XSRF, parsing JSON, gestion des erreurs. |
+| `useFlash.js` | Singleton de notification : expose `flash(message, type)`, auto-dismiss configurable. |
+| `usePolls.js` | État du dashboard : liste des sondages, suppression optimiste avec rollback en cas d'erreur. |
+| `usePollForm.js` | Validation et soumission du formulaire de création/édition, normalisation NFC des chaînes. |
+| `usePollStatus.js` | Propriétés calculées sur l'état d'un sondage (`isDraft`, `isRunning`, `isExpired`). Option `withClock` pour une réactivité à la seconde via `watchEffect`. |
+| `usePollVote.js` | Gestion de la sélection des options et soumission du vote, avec gestion des codes d'erreur API (401, 403, 409, 422). |
+| `usePolling.js` | Lance un `setInterval` au montage du composant et le nettoie au démontage. Utilisé pour rafraîchir les résultats toutes les 5 secondes. |
+
+---
+
+## Endpoints API JSON
+
+Base : `/api/v1/`
+
+| Méthode | URL | Auth | Description |
+|---------|-----|------|-------------|
+| `GET` | `/polls` | oui | Liste des sondages de l'utilisateur connecté |
+| `POST` | `/polls` | oui | Crée un sondage (brouillon) |
+| `GET` | `/polls/id/{id}` | oui | Détail d'un sondage par ID (propriétaire uniquement) |
+| `PUT` | `/polls/{id}` | oui | Modifie un sondage (brouillon uniquement) |
+| `POST` | `/polls/{id}/start` | oui | Lance un sondage (brouillon vers actif) |
+| `DELETE` | `/polls/{id}` | oui | Supprime un sondage |
+| `GET` | `/polls/{token}` | non | Détail public d'un sondage (via token) |
+| `GET` | `/polls/{token}/results` | non | Résultats publics (nombre de votes par option) |
+| `POST` | `/polls/{token}/vote` | oui | Soumet un vote |
+| `GET` | `/polls/{token}/vote` | oui | Options déjà votées par l'utilisateur |
+
+J'ai garanti l'unicité du vote en mode choix unique côté API : un second vote retourne un `409 Conflict` si `allow_vote_change` est désactivé, ou remplace le vote précédent si activé.
+
+---
+
+## Choix techniques
+
+### Pourquoi Chart.js + vue-chartjs ?
+
+J'ai choisi **Chart.js** car c'est la bibliothèque de graphiques la plus répandue de l'écosystème JavaScript : documentation exhaustive, maintenance active, légère (~60 KB gzippé), et elle couvre tous les types de graphiques courants sans dépendances externes.
+
+J'ai utilisé **vue-chartjs** car c'est le wrapper officiel Vue 3 pour Chart.js. Il expose les graphiques comme des composants Vue ordinaires, ce qui me permet de piloter les données directement depuis des `ref`/`computed` sans manipuler l'instance Chart.js manuellement. La réactivité est gérée automatiquement : passer un nouvel objet `chartData` suffit pour mettre à jour le graphique.
+
+Ma première idée était d'utiliser Apache ECharts, qui est très puissant pour les visualisations complexes. Cependant, il est plus lourd (~200 KB gzippé) et son intégration avec Vue 3 est moins fluide que vue-chartjs. Pour une application de sondage avec des graphiques relativement simples (barres), Chart.js semble offrir un meilleur compromis entre fonctionnalités et performance.
+
+### Architecture multi-apps Vue (sans Vue Router)
+
+J'ai délégué le routing à Laravel. Chaque page Blade monte son propre entrypoint Vite indépendant. Cette approche évite d'embarquer un routeur SPA complet (Vue Router) pour une application où les transitions de page sont gérées par le serveur. Elle simplifie aussi l'intégration avec le système d'authentification existant (cookie de session Sanctum).
+
+### Sanctum SPA (cookie de session)
+
+Les apps Vue sont embarquées sur le même domaine que le backend. L'authentification repose sur le **cookie de session** Laravel, pas sur un Bearer token. Le token XSRF est lu depuis le cookie `XSRF-TOKEN` au démarrage et injecté dans chaque requête mutante via `bootstrap.js`.
+
+### Pas de Pinia ni Vuex
+
+L'état partagé entre composants est minimal et géré via des composables à portée de module. Introduire un store global aurait ajouté de la complexité sans bénéfice réel pour la taille de cette application.
+
+---
+
+## Pages de l'application
+
+| URL | Accès | Description |
+|-----|-------|-------------|
+| `/polls/dashboard` | Connecté | Liste de mes sondages |
+| `/polls/create` | Connecté | Formulaire de création |
+| `/polls/{id}/edit` | Connecté (propriétaire) | Formulaire d'édition, lancement, lien de partage |
+| `/polls/{token}` | Public (mais pas de vote possible si pas authentifié) | Page de vote et résultats |
