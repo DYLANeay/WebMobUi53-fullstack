@@ -94,7 +94,10 @@ class ApiPollController extends Controller
         $poll->save();
 
         // recharge les options pour retourner le poll complet
-        return response()->json($poll->load("options"));
+        $poll->load("options");
+        $poll->makeHidden("secret_token");
+
+        return response()->json($poll);
     }
 
     /**
@@ -113,6 +116,8 @@ class ApiPollController extends Controller
         if (!$poll) {
             return response()->json(["message" => "Poll not found."], 404);
         }
+
+        $poll->makeHidden("secret_token");
 
         return $poll;
     }

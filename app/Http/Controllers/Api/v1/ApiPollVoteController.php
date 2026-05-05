@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class ApiPollVoteController extends Controller
 {
     /**
-     * Submit a vote on a poll (authenticated user).
+     * Submit a vote on a poll (authenticated user)
      */
     public function store(Request $request, string $token)
     {
@@ -110,6 +110,8 @@ class ApiPollVoteController extends Controller
                 $query->withCount("votes");
             },
         ]);
+
+        $poll->makeHidden("secret_token");
 
         return response()->json($poll);
     }
