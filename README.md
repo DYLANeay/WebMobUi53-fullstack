@@ -139,6 +139,20 @@ L'état partagé entre composants est minimal et géré via des composables à p
 
 ---
 
+## Fichiers supprimés (refactor — lisibilité)
+
+Ces fichiers étaient présents dans le template de départ mais **n'ont jamais été utilisés** par les apps Vue du projet. Les garder créait de la confusion et augmentait la charge cognitive sans valeur ajoutée.
+
+| Fichier | Pourquoi il a été supprimé |
+|---------|---------------------------|
+| `resources/js/utils/fetchJson.js` | Wrapper `fetch` bas niveau jamais appelé. Le projet utilise exclusivement `useFetchApi.js` pour les requêtes HTTP. |
+| `resources/js/composables/useFetchJson.js` | Dépend de `fetchJson.js` et n'était importé nulle part. |
+| `resources/js/composables/useHashRoute.js` | Router hash interne inutilisé — le routing est entièrement délégué à Laravel (`routes/web.php`). |
+| `resources/js/composables/useJsonStorage.js` | Wrapper `localStorage` réactif jamais utilisé ; aucun état n'a besoin de persistance locale. |
+| `resources/js/utils/jsonStorage.js` | Utilitaire sous-jacent à `useJsonStorage.js`, également inutilisé. |
+
+---
+
 ## Pages de l'application
 
 | URL | Accès | Description |
