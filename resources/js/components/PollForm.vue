@@ -42,11 +42,42 @@ function buildInitialForm() {
 
 const form = ref(buildInitialForm());
 
+function secondsToDHM(totalSeconds) {
+    if (!totalSeconds || totalSeconds <= 0)
+        return { days: 0, hours: 0, minutes: 0 };
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    return { days, hours, minutes };
+}
+
+const durationDays = ref(0);
+const durationHours = ref(0);
+const durationMinutes = ref(0);
+
+// si mode édition
+if (form.value.duration) {
+    const dhm = secondsToDHM(form.value.duration);
+    durationDays.value = dhm.days;
+    durationHours.value = dhm.hours;
+    durationMinutes.value = dhm.minutes;
+}
+
+// form.duration => secondes
+watch(
+    [durationDays, durationHours, durationMinutes],
+    ([d, h, m]) => {
+        const total = d * 86400 + h * 3600 + m * 60;
+        form.value.duration = total > 0 ? total : null;
+    },
+    { immediate: true },
+);
+
 const pollId = props.poll?.id ?? null;
 const { formErrors, globalError, submitting, validate, submit, isEdit } =
     usePollForm(pollId);
 
-// watch pour la validation live — { deep: true } surveille les propriétés imbriquées
+// watch pour la validation live
 watch(
     form,
     () => {
@@ -183,18 +214,70 @@ async function handleSubmit() {
                     <span class="text-sm text-gray-700">Résultats publics</span>
                 </label>
                 <div>
-                    <label for="duration" class="block text-sm text-gray-700">
-                        Durée (secondes, optionnel)
-                    </label>
-                    <input
-                        id="duration"
-                        v-model.number="form.duration"
-                        type="number"
-                        min="60"
-                        max="604800"
-                        placeholder="Ex : 3600"
-                        class="mt-1 block w-full sm:w-40 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
+                    <p class="block text-sm text-gray-700">Durée (optionnel)</p>
+                    <div class="mt-1 flex gap-2">
+                        <div class="flex-1">
+                            <label
+                                :for="`duration-days-${pollId ?? 'new'}`"
+                                class="sr-only"
+                                >Jours</label
+                            >
+                            <!-- .number => force à mettre en number -->
+                            <input
+                                :id="`duration-days-${pollId ?? 'new'}`"
+                                v-model.number="durationDays"
+                                type="number"
+                                min="0"
+                                max="365"
+                                placeholder="0"
+                                class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            />
+                            <span
+                                class="mt-0.5 block text-center text-xs text-gray-500"
+                                >jours</span
+                            >
+                        </div>
+                        <div class="flex-1">
+                            <label
+                                :for="`duration-hours-${pollId ?? 'new'}`"
+                                class="sr-only"
+                                >Heures</label
+                            >
+                            <input
+                                :id="`duration-hours-${pollId ?? 'new'}`"
+                                v-model.number="durationHours"
+                                type="number"
+                                min="0"
+                                max="23"
+                                placeholder="0"
+                                class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            />
+                            <span
+                                class="mt-0.5 block text-center text-xs text-gray-500"
+                                >heures</span
+                            >
+                        </div>
+                        <div class="flex-1">
+                            <label
+                                :for="`duration-minutes-${pollId ?? 'new'}`"
+                                class="sr-only"
+                                >Minutes</label
+                            >
+                            <input
+                                :id="`duration-minutes-${pollId ?? 'new'}`"
+                                v-model.number="durationMinutes"
+                                type="number"
+                                min="0"
+                                max="59"
+                                placeholder="0"
+                                class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            />
+                            <span
+                                class="mt-0.5 block text-center text-xs text-gray-500"
+                                >minutes</span
+                            >
+                        </div>
+                    </div>
                 </div>
             </div>
         </fieldset>
