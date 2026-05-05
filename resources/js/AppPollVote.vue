@@ -4,6 +4,7 @@ import { usePollVote } from "./composables/usePollVote";
 import { usePollStatus } from "./composables/usePollStatus";
 import { usePolling } from "./composables/usePolling";
 import { useFetchApi } from "./composables/useFetchApi";
+import PollResultsChart from "./components/PollResultsChart.vue";
 
 const props = defineProps({
     poll: { type: Object, required: true },
@@ -73,11 +74,6 @@ const totalVotes = computed(() => {
     );
 });
 
-function getPercentage(option) {
-    if (totalVotes.value === 0) return 0;
-    return Math.round(((option.votes_count || 0) / totalVotes.value) * 100);
-}
-
 const { fetchApi } = useFetchApi("/api/v1");
 
 async function refreshResults() {
@@ -131,27 +127,7 @@ usePolling(refreshResults, 5000);
 
             <div class="space-y-4">
                 <h2 class="text-lg font-semibold text-gray-900">Resultats</h2>
-                <div
-                    v-for="option in poll.options"
-                    :key="option.id"
-                    class="space-y-1"
-                >
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-700">{{ option.label }}</span>
-                        <span class="font-medium text-gray-900">
-                            {{ option.votes_count || 0 }}
-                            vote{{ option.votes_count === 1 ? "" : "s" }} ({{
-                                getPercentage(option)
-                            }}%)
-                        </span>
-                    </div>
-                    <div class="h-2 w-full rounded-full bg-gray-100">
-                        <div
-                            class="h-2 rounded-full bg-indigo-600 transition-all duration-500"
-                            :style="{ width: getPercentage(option) + '%' }"
-                        ></div>
-                    </div>
-                </div>
+                <PollResultsChart :options="poll.options" />
                 <p class="text-sm text-gray-500">
                     Total : {{ totalVotes }} vote{{
                         totalVotes === 1 ? "" : "s"
@@ -245,27 +221,7 @@ usePolling(refreshResults, 5000);
                 class="space-y-4 pt-6 border-t border-gray-200"
             >
                 <h2 class="text-lg font-semibold text-gray-900">Resultats</h2>
-                <div
-                    v-for="option in poll.options"
-                    :key="option.id"
-                    class="space-y-1"
-                >
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-700">{{ option.label }}</span>
-                        <span class="font-medium text-gray-900">
-                            {{ option.votes_count || 0 }}
-                            vote{{ option.votes_count === 1 ? "" : "s" }} ({{
-                                getPercentage(option)
-                            }}%)
-                        </span>
-                    </div>
-                    <div class="h-2 w-full rounded-full bg-gray-100">
-                        <div
-                            class="h-2 rounded-full bg-indigo-600 transition-all duration-500"
-                            :style="{ width: getPercentage(option) + '%' }"
-                        ></div>
-                    </div>
-                </div>
+                <PollResultsChart :options="poll.options" />
                 <p class="text-sm text-gray-500">
                     Total : {{ totalVotes }} vote{{
                         totalVotes === 1 ? "" : "s"
