@@ -5,6 +5,8 @@ import { usePollStatus } from "./composables/usePollStatus";
 
 const props = defineProps({
     poll: { type: Object, required: true },
+    hasVoted: { type: Boolean, default: false },
+    votedOptionIds: { type: Array, default: () => [] },
 });
 
 // Ref locale : on mute cette valeur après le vote pour rafraîchir les résultats
@@ -30,6 +32,25 @@ const {
     isSelected,
     submit,
 } = usePollVote();
+
+// Pré-sélectionne les options déjà votées par l'utilisateur (utile quand
+// allow_vote_change est activé, sinon juste pour visualiser ce qui a été voté).
+if (props.hasVoted && props.votedOptionIds.length > 0) {
+    selectedOptions.value = [...props.votedOptionIds];
+}
+
+// Affiche les résultats si l'utilisateur a déjà voté, vient juste de voter,
+// ou si le sondage rend les résultats publics.
+const showResults = computed(() => {
+    return props.hasVoted || success.value || poll.value.results_public;
+});
+
+// Masque le formulaire si l'utilisateur a déjà voté et ne peut pas changer son vote.
+const showForm = computed(() => {
+    if (success.value) return false;
+    if (props.hasVoted && !poll.value.allow_vote_change) return false;
+    return true;
+});
 
 async function handleSubmit() {
     const result = await submit(
@@ -120,8 +141,15 @@ function getPercentage(option) {
                 Merci d'avoir vote !
             </div>
 
+            <div
+                v-else-if="hasVoted"
+                class="rounded-md bg-blue-50 p-4 text-sm text-blue-800 ring-1 ring-inset ring-blue-200"
+            >
+                Vous avez déjà voté pour ce sondage.
+            </div>
+
             <form
-                v-if="!success"
+                v-if="showForm"
                 class="space-y-4"
                 @submit.prevent="handleSubmit"
             >
@@ -186,7 +214,7 @@ function getPercentage(option) {
 
             <!-- show results -->
             <div
-                v-if="success || poll.results_public"
+                v-if="showResults"
                 class="space-y-4 pt-6 border-t border-gray-200"
             >
                 <h2 class="text-lg font-semibold text-gray-900">Resultats</h2>
