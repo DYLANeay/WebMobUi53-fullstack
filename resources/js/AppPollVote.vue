@@ -88,12 +88,8 @@ async function refreshResults() {
         // On remplace l'array des options, vue rerender
         // les barres / le total via le computed totalVotes
         poll.value.options = data.options;
-    } catch (e) {
-        console.error(
-            "Erreur en rafraîchissant les résultats :",
-            e,
-            " on reessayera au prochain intervalle",
-        );
+    } catch {
+        // silencieux : on réessaiera au prochain intervalle
     }
 }
 
