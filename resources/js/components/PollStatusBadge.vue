@@ -21,16 +21,6 @@ const label = computed(
             ended: "Terminé",
         })[status.value],
 );
-//strictement la même chose
-// const label2 = computed(() => {
-//     const map = {
-//         draft: "Brouillon",
-//         running: "En cours",
-//         ended: "Terminé",
-//     };
-//     return map[status.value];
-// });
-
 const classes = computed(
     () =>
         ({
