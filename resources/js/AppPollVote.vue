@@ -122,7 +122,7 @@ usePolling(refreshResults, 5000);
             </div>
 
             <div class="space-y-4">
-                <h2 class="text-lg font-semibold text-gray-900">Resultats</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Résultats</h2>
                 <PollResultsChart :options="poll.options" />
                 <p class="text-sm text-gray-500">
                     Total : {{ totalVotes }} vote{{
@@ -216,7 +216,7 @@ usePolling(refreshResults, 5000);
                 v-if="showResults"
                 class="space-y-4 pt-6 border-t border-gray-200"
             >
-                <h2 class="text-lg font-semibold text-gray-900">Resultats</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Résultats</h2>
                 <PollResultsChart :options="poll.options" />
                 <p class="text-sm text-gray-500">
                     Total : {{ totalVotes }} vote{{
