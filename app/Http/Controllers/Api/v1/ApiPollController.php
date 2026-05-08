@@ -160,21 +160,6 @@ class ApiPollController extends Controller
     }
 
     /**
-     * Display the specified poll by id (authenticated owner only).
-     */
-
-    // unused so far but could be useful for the dashboard to edit polls
-    public function showById(Request $request, Poll $poll)
-    {
-        if ($poll->user_id !== $request->user()->id) {
-            return response()->json(["message" => "Unauthorized."], 403);
-        }
-
-        // retourne le poll avec des options
-        return $poll->load("options");
-    }
-
-    /**
      * Update the specified poll (authenticated owner only).
      */
     public function update(Request $request, Poll $poll)
