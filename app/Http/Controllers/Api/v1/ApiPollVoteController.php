@@ -69,14 +69,10 @@ class ApiPollVoteController extends Controller
                 $existing = PollVote::where("poll_id", $poll->id)
                     ->where("user_id", $userId)
                     ->first();
-
-                if ($existing) {
-                    if (!$poll->allow_vote_change) {
-                        abort(409, "Vous avez déjà voté pour ce sondage.");
-                    }
-                    // Delete old vote before creating new one
-                    $existing->delete();
+                if ($existing && !$poll->allow_vote_change) {
+                    abort(409, "Vous avez déjà voté pour ce sondage.");
                 }
+                $existing?->delete();
             } else {
                 // Multiple choice mode: remove votes for options
                 // that are no longer selected (if changing vote)
