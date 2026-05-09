@@ -56,8 +56,7 @@ export function usePollVote() {
             return result;
         } catch (err) {
             if (err.status === 401) {
-                error.value =
-                    err.data?.message ?? "Vous devez être connecté pour voter.";
+                error.value = "Veuillez vous connecter pour voter.";
             } else if (err.status === 409) {
                 error.value =
                     err.data?.message ?? "Vous avez déjà voté pour ce sondage.";
