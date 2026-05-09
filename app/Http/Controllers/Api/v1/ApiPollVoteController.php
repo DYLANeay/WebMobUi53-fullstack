@@ -109,6 +109,12 @@ class ApiPollVoteController extends Controller
 
         $poll->makeHidden("secret_token");
 
+   
+
+        if (!$poll->canShowResultsTo($request->user())) {
+            $poll->options->each->makeHidden("votes_count");
+        }
+
         return response()->json($poll);
     }
 
