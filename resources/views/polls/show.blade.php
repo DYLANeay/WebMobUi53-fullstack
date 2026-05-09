@@ -11,5 +11,6 @@
         'poll' => $poll,
         'hasVoted' => $hasVoted,
         'votedOptionIds' => $votedOptionIds,
+        'isOwner' => $isOwner,
     ]) }}"></div>
 </x-vue-app-layout>

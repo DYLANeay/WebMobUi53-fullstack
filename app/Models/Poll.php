@@ -77,4 +77,13 @@ class Poll extends Model
     {
         return $this->hasMany(PollVote::class);
     }
+
+    // verif que les résultats sont publics et/ou que l'user est le créateur
+    public function canShowResultsTo(?User $user): bool
+    {
+        if ($this->results_public) {
+            return true;
+        }
+        return $user !== null && $user->id === $this->user_id;
+    }
 }

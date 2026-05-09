@@ -103,7 +103,7 @@ class ApiPollController extends Controller
     /**
      * Display the specified poll by its secret token.
      */
-    public function show(string $token)
+    public function show(Request $request, string $token)
     {
         $poll = Poll::with([
             "options" => function ($query) {
@@ -119,15 +119,19 @@ class ApiPollController extends Controller
 
         $poll->makeHidden("secret_token");
 
+        // Ne pas fuiter les compteurs si l'appelant n'a pas le droit.
+        if (!$poll->canShowResultsTo($request->user())) {
+            $poll->options->each->makeHidden("votes_count");
+        }
+
         return $poll;
     }
 
     /**
      * Public results for a poll (counts per option, total, ended state).
-     * Quiconque a le secret_token peut consulter
-     * c'est l'endpoint que le polling frontend (@usePolling) va appeler toutes les 5s.
+     * Endpoint appelé par le polling frontend (@usePolling) toutes les 5s.
      */
-    public function results(string $token)
+    public function results(Request $request, string $token)
     {
         $poll = Poll::with([
             "options" => function ($query) {
@@ -139,6 +143,13 @@ class ApiPollController extends Controller
 
         if (!$poll) {
             return response()->json(["message" => "Poll not found."], 404);
+        }
+
+        if (!$poll->canShowResultsTo($request->user())) {
+            return response()->json(
+                ["message" => "Results are not public."],
+                403,
+            );
         }
 
         // Somme calculée côté API
@@ -157,21 +168,6 @@ class ApiPollController extends Controller
             "has_ended" => $hasEnded,
             "ends_at" => $poll->ends_at,
         ]);
-    }
-
-    /**
-     * Display the specified poll by id (authenticated owner only).
-     */
-
-    // unused so far but could be useful for the dashboard to edit polls
-    public function showById(Request $request, Poll $poll)
-    {
-        if ($poll->user_id !== $request->user()->id) {
-            return response()->json(["message" => "Unauthorized."], 403);
-        }
-
-        // retourne le poll avec des options
-        return $poll->load("options");
     }
 
     /**

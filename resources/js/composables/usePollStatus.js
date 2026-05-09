@@ -29,7 +29,7 @@ export function usePollStatus(pollRef, { withClock = false } = {}) {
 
     const statusLabel = computed(() => {
         if (isDraft.value) return "Brouillon";
-        if (isExpired.value) return "Termine";
+        if (isExpired.value) return "Terminé";
         if (isRunning.value) return "En cours";
         return "Inconnu";
     });

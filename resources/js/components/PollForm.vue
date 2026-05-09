@@ -105,7 +105,7 @@ async function handleSubmit() {
         const poll = await submit(form.value);
         emit("saved", poll);
     } catch {
-        // errors est déjà rempli par usePollForm
+        // erreurs réactives dans usePollForm (formErrors / globalError)
     }
 }
 </script>
