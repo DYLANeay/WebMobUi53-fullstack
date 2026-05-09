@@ -10,6 +10,7 @@ const props = defineProps({
     poll: { type: Object, required: true },
     hasVoted: { type: Boolean, default: false },
     votedOptionIds: { type: Array, default: () => [] },
+    isOwner: { type: Boolean, default: false },
 });
 
 // Ref locale : on mute cette valeur après le vote pour rafraîchir les résultats
@@ -42,10 +43,20 @@ if (props.hasVoted && props.votedOptionIds.length > 0) {
     selectedOptions.value = [...props.votedOptionIds];
 }
 
-// Affiche les résultats si l'utilisateur a déjà voté, vient juste de voter,
-// ou si le sondage rend les résultats publics.
+// Si results_public est faux, seul le owner a le droit de voir le graphique.
+const canSeeResults = computed(() => {
+    return poll.value.results_public || props.isOwner;
+});
+
+// Affiche les résultats si l'utilisateur a le droit, et qu'il a voté, ...
 const showResults = computed(() => {
-    return props.hasVoted || success.value || poll.value.results_public;
+    if (!canSeeResults.value) return false;
+    return (
+        props.hasVoted ||
+        success.value ||
+        poll.value.results_public ||
+        props.isOwner
+    );
 });
 
 // Masque le formulaire si l'utilisateur a déjà voté et ne peut pas changer son vote.
@@ -77,8 +88,9 @@ const totalVotes = computed(() => {
 const { fetchApi } = useFetchApi("/api/v1");
 
 async function refreshResults() {
-    // Brouillon ou fini => pas besoin de rafraîchir
     if (isDraft.value || isExpired.value) return;
+    // Pas le droit de voir les résultats => inutile d'appeler l'API
+    if (!canSeeResults.value) return;
 
     try {
         const data = await fetchApi({
@@ -121,7 +133,7 @@ usePolling(refreshResults, 5000);
                 Ce sondage est terminé.
             </div>
 
-            <div class="space-y-4">
+            <div v-if="canSeeResults" class="space-y-4">
                 <h2 class="text-lg font-semibold text-gray-900">Résultats</h2>
                 <PollResultsChart :options="poll.options" />
                 <p class="text-sm text-gray-500">
@@ -129,6 +141,12 @@ usePolling(refreshResults, 5000);
                         totalVotes === 1 ? "" : "s"
                     }}
                 </p>
+            </div>
+            <div
+                v-else
+                class="rounded-md bg-gray-50 p-4 text-sm text-gray-600 ring-1 ring-inset ring-gray-200"
+            >
+                Les résultats de ce sondage ne sont pas publics.
             </div>
         </div>
 
@@ -138,6 +156,9 @@ usePolling(refreshResults, 5000);
                 class="rounded-md bg-green-50 p-4 text-sm text-green-800 ring-1 ring-inset ring-green-200"
             >
                 Merci d'avoir voté !
+                <span v-if="!canSeeResults">
+                    Les résultats de ce sondage sont privés.
+                </span>
             </div>
 
             <div
