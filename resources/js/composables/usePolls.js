@@ -1,13 +1,12 @@
 import { ref } from "vue";
 import { useFetchApi } from "./useFetchApi";
-import { useFlash } from "./useFlash";
+import { flash } from "../stores/flashStore";
 
 export function usePolls(initialPolls = []) {
     const polls = ref([...initialPolls]);
     const error = ref(null);
 
     const { fetchApi } = useFetchApi();
-    const { flash } = useFlash();
 
     async function remove(id) {
         const previous = polls.value;
