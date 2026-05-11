@@ -1,16 +1,27 @@
 <script setup>
+import { computed } from "vue";
+
 // defineModel se déclare dans l'enfant, et se lie par nom de model
 // implicitement "modelValue", mais on peut aussi lui donner un nom personnalisé (rien à voir), ici "open"
 const open = defineModel({ type: Boolean, required: true });
 
-defineProps({
+const props = defineProps({
     title: { type: String, default: "Confirmer" },
     message: { type: String, default: "Êtes-vous sûr ?" },
     confirmLabel: { type: String, default: "Confirmer" },
     cancelLabel: { type: String, default: "Annuler" },
+    // variant pilote la couleur du bouton de confirmation.
+    // "danger" (rouge) par défaut, "success" (vert) pour les actions positives.
+    variant: { type: String, default: "danger" },
 });
 
 const emit = defineEmits(["confirm", "cancel"]);
+
+const confirmClass = computed(() =>
+    props.variant === "success"
+        ? "bg-green-600 hover:bg-green-500"
+        : "bg-red-600 hover:bg-red-500",
+);
 
 function confirm() {
     emit("confirm");
@@ -44,7 +55,8 @@ function cancel() {
                     </button>
                     <button
                         type="button"
-                        class="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-500"
+                        class="rounded-md px-3 py-2 text-sm font-medium text-white shadow-sm"
+                        :class="confirmClass"
                         @click="confirm"
                     >
                         {{ confirmLabel }}
