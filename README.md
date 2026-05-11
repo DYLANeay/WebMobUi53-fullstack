@@ -10,7 +10,9 @@ J'utilise `chart.js` et `vue-chartjs` pour les graphiques (voir [Choix technique
 
 ```bash
 npm install
-npm run build
+npm run dev      # serveur Vite avec HMR (dev)
+# ou
+npm run build    # bundle de production
 ```
 
 ---
@@ -23,14 +25,16 @@ npm run build
 |---------|-------------|
 | `app/Models/Poll.php` | J'ai ajouté le hook `boot()` pour générer automatiquement un `secret_token` unique (32 chars) à la création via `Str::random()` avec boucle de garde anti-collision. J'ai aussi ajouté les casts pour les booléens et les dates. |
 
-### Contrôleurs web (ajoutés)
+### Contrôleur web (ajouté)
 
-| Fichier | Rôle |
-|---------|------|
-| `app/Http/Controllers/PollDashboardController.php` | Charge la liste des sondages de l'utilisateur connecté et monte la vue Blade `polls.dashboard`. |
-| `app/Http/Controllers/PollCreateController.php` | Monte la vue Blade `polls.create` (mode création). |
-| `app/Http/Controllers/PollEditController.php` | Charge le sondage par ID (avec vérification de propriété), monte `polls.edit`. |
-| `app/Http/Controllers/PollShowController.php` | Page publique de vote/résultats : charge le sondage par token, les résultats et les votes déjà soumis par l'utilisateur connecté (si applicable). |
+Un seul contrôleur resourceful (`app/Http/Controllers/PollController.php`) regroupe les 4 pages liées aux sondages. Chaque méthode monte une vue Blade dédiée qui sert d'hôte à une app Vue.
+
+| Méthode | Route | Rôle |
+|---------|-------|------|
+| `index()` | `GET /polls/dashboard` | Charge la liste des sondages de l'utilisateur connecté, monte `polls.dashboard`. |
+| `create()` | `GET /polls/create` | Monte `polls.create` (mode création, sans données initiales). |
+| `edit(Poll $poll)` | `GET /polls/{poll}/edit` | Route-model binding + vérification de propriété, monte `polls.edit`. |
+| `show(string $token)` | `GET /polls/{token}` | Page publique : charge le sondage par token, les résultats et les votes déjà soumis (si utilisateur connecté). |
 
 ### Contrôleurs API (ajoutés)
 
@@ -38,13 +42,13 @@ Tous dans `app/Http/Controllers/Api/v1/`.
 
 | Fichier | Endpoints gérés |
 |---------|----------------|
-| `ApiPollController.php` | `GET /v1/polls`, `POST /v1/polls`, `GET /v1/polls/id/{poll}`, `PUT /v1/polls/{poll}`, `POST /v1/polls/{poll}/start`, `DELETE /v1/polls/{poll}`, `GET /v1/polls/{token}`, `GET /v1/polls/{token}/results` |
+| `ApiPollController.php` | `GET /v1/polls`, `POST /v1/polls`, `PUT /v1/polls/{poll}`, `POST /v1/polls/{poll}/start`, `DELETE /v1/polls/{poll}`, `GET /v1/polls/{token}`, `GET /v1/polls/{token}/results` |
 | `ApiPollVoteController.php` | `POST /v1/polls/{token}/vote`, `GET /v1/polls/{token}/vote` |
 
 ### Routes (modifiées)
 
 - `routes/web.php` : ajout des 4 routes de pages sondage (dashboard, create, edit, show publique).
-- `routes/api.php` : ajout des 10 endpoints `/api/v1/polls/...`.
+- `routes/api.php` : ajout des 9 endpoints `/api/v1/polls/...`.
 
 ### Frontend Vue.js (entièrement ajouté)
 
@@ -64,33 +68,66 @@ Chaque page Blade monte sa propre application Vue isolée. Il n'y a pas de route
 | `poll-edit.js` | `AppPollEdit.vue` | `/polls/create` et `/polls/{id}/edit` |
 | `poll-vote.js` | `AppPollVote.vue` | `/polls/{token}` |
 
-### Composants (`resources/js/components/`)
+### Containers d'app (`resources/js/`)
 
 | Fichier | Rôle |
 |---------|------|
 | `AppPollDashboard.vue` | Container racine du dashboard : charge la liste, gère la suppression avec confirmation. |
 | `AppPollEdit.vue` | Container de création/édition : affiche le formulaire (brouillon), le panneau de lancement, ou le lien de partage selon l'état. |
 | `AppPollVote.vue` | Container de la page publique : formulaire de vote (radio/checkbox), résultats en direct, graphique, gestion de l'expiration. |
+
+### Composants (`resources/js/components/`)
+
+Les composants sont organisés en sous-dossiers par responsabilité : `poll/` regroupe le domaine métier sondage, `ui/` les briques réutilisables génériques.
+
+#### `components/poll/` — domaine sondage
+
+| Fichier | Rôle |
+|---------|------|
 | `PollForm.vue` | Formulaire réutilisable question + options + paramètres. Validation côté client en temps réel. |
 | `PollOptionInput.vue` | Champ de saisie d'une option (avec bouton suppression). Utilise `defineModel`. |
 | `PollTable.vue` | Tableau responsive des sondages du dashboard avec badges de statut et actions. |
 | `PollStatusBadge.vue` | Badge coloré indiquant l'état du sondage (brouillon / en cours / terminé). |
 | `PollResultsChart.vue` | Graphique en barres (Chart.js) des résultats, mis à jour réactivement. |
 | `ShareLink.vue` | Affiche le lien de partage avec bouton copie + toast de confirmation. |
+
+#### `components/ui/` — UI générique
+
+| Fichier | Rôle |
+|---------|------|
 | `FlashToast.vue` | Notification temporaire (3 s) téléportée dans le `<body>`, avec animation. |
 | `ConfirmModal.vue` | Modale de confirmation réutilisable, téléportée dans le `<body>`. |
 
 ### Composables (`resources/js/composables/`)
 
+Même logique de découpage que les composants : `api/` pour le client HTTP, `poll/` pour la logique métier, `ui/` pour les utilitaires génériques.
+
+#### `composables/api/`
+
 | Fichier | Rôle |
 |---------|------|
 | `useFetchApi.js` | Client HTTP : `fetch` avec `AbortController`, timeout 5 s, injection automatique du token XSRF, parsing JSON, gestion des erreurs. |
-| `useFlash.js` | Singleton de notification : expose `flash(message, type)`, auto-dismiss configurable. |
+
+#### `composables/poll/`
+
+| Fichier | Rôle |
+|---------|------|
 | `usePolls.js` | État du dashboard : liste des sondages, suppression optimiste avec rollback en cas d'erreur. |
 | `usePollForm.js` | Validation et soumission du formulaire de création/édition, normalisation NFC des chaînes. |
 | `usePollStatus.js` | Propriétés calculées sur l'état d'un sondage (`isDraft`, `isRunning`, `isExpired`). Option `withClock` pour une réactivité à la seconde via `watchEffect`. |
 | `usePollVote.js` | Gestion de la sélection des options et soumission du vote, avec gestion des codes d'erreur API (401, 403, 409, 422). |
+
+#### `composables/ui/`
+
+| Fichier | Rôle |
+|---------|------|
 | `usePolling.js` | Lance un `setInterval` au montage du composant et le nettoie au démontage. Utilisé pour rafraîchir les résultats toutes les 5 secondes. |
+
+### Stores (`resources/js/stores/`)
+
+| Fichier | Rôle |
+|---------|------|
+| `flashStore.js` | Store global minimaliste de notifications (refs `message`, `type`, `visible` + fonctions `flash()` / `dismiss()`). Pas de Pinia — simple module exportant des `ref` partagés, suffisant pour cette portée. |
 
 ---
 
@@ -102,7 +139,6 @@ Base : `/api/v1/`
 |---------|-----|------|-------------|
 | `GET` | `/polls` | oui | Liste des sondages de l'utilisateur connecté |
 | `POST` | `/polls` | oui | Crée un sondage (brouillon) |
-| `GET` | `/polls/id/{id}` | oui | Détail d'un sondage par ID (propriétaire uniquement) |
 | `PUT` | `/polls/{id}` | oui | Modifie un sondage (brouillon uniquement) |
 | `POST` | `/polls/{id}/start` | oui | Lance un sondage (brouillon vers actif) |
 | `DELETE` | `/polls/{id}` | oui | Supprime un sondage |
