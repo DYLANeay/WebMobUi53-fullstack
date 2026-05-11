@@ -1,10 +1,10 @@
 <script setup>
 import { computed, ref } from "vue";
-import { usePollVote } from "./composables/usePollVote";
-import { usePollStatus } from "./composables/usePollStatus";
-import { usePolling } from "./composables/usePolling";
-import { useFetchApi } from "./composables/useFetchApi";
-import PollResultsChart from "./components/PollResultsChart.vue";
+import { usePollVote } from "./composables/poll/usePollVote";
+import { usePollStatus } from "./composables/poll/usePollStatus";
+import { usePolling } from "./composables/ui/usePolling";
+import { useFetchApi } from "./composables/api/useFetchApi";
+import PollResultsChart from "./components/poll/PollResultsChart.vue";
 
 const props = defineProps({
     poll: { type: Object, required: true },

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import PollOptionInput from "./PollOptionInput.vue";
-import { usePollForm } from "../composables/usePollForm";
+import { usePollForm } from "../../composables/poll/usePollForm";
 
 const props = defineProps({
     poll: { type: Object, default: null },

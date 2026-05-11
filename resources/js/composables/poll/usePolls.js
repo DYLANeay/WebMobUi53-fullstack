@@ -1,6 +1,6 @@
 import { ref } from "vue";
-import { useFetchApi } from "./useFetchApi";
-import { flash } from "../stores/flashStore";
+import { useFetchApi } from "../api/useFetchApi";
+import { flash } from "../../stores/flashStore";
 
 export function usePolls(initialPolls = []) {
     const polls = ref([...initialPolls]);

@@ -1,4 +1,4 @@
-import { setDefaultHeaders, setDefaultBaseUrl } from './composables/useFetchApi';
+import { setDefaultHeaders, setDefaultBaseUrl } from './composables/api/useFetchApi';
 
 setDefaultBaseUrl('/api/v1');
 

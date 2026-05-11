@@ -1,5 +1,5 @@
 <script setup>
-import { message, type, visible, dismiss } from "../stores/flashStore";
+import { message, type, visible, dismiss } from "../../stores/flashStore";
 </script>
 
 <template>

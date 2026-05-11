@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from "vue";
-import PollTable from "./components/PollTable.vue";
-import ConfirmModal from "./components/ConfirmModal.vue";
-import { usePolls } from "./composables/usePolls";
+import PollTable from "./components/poll/PollTable.vue";
+import ConfirmModal from "./components/ui/ConfirmModal.vue";
+import { usePolls } from "./composables/poll/usePolls";
 
 //rend data accessible dans compo
 const props = defineProps({

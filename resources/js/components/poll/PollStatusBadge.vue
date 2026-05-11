@@ -1,6 +1,6 @@
 <script setup>
 import { toRef } from "vue";
-import { usePollStatus } from "../composables/usePollStatus";
+import { usePollStatus } from "../../composables/poll/usePollStatus";
 
 const props = defineProps({
     poll: { type: Object, required: true },

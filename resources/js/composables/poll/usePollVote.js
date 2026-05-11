@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { useFetchApi } from "./useFetchApi";
+import { useFetchApi } from "../api/useFetchApi";
 
 export function usePollVote() {
     const { fetchApi } = useFetchApi("/api/v1");

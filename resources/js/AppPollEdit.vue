@@ -1,11 +1,11 @@
 <script setup>
 import { ref } from "vue";
-import PollForm from "./components/PollForm.vue";
-import ShareLink from "./components/ShareLink.vue";
-import FlashToast from "./components/FlashToast.vue";
-import ConfirmModal from "./components/ConfirmModal.vue";
-import { useFetchApi } from "./composables/useFetchApi";
-import { usePollStatus } from "./composables/usePollStatus";
+import PollForm from "./components/poll/PollForm.vue";
+import ShareLink from "./components/poll/ShareLink.vue";
+import FlashToast from "./components/ui/FlashToast.vue";
+import ConfirmModal from "./components/ui/ConfirmModal.vue";
+import { useFetchApi } from "./composables/api/useFetchApi";
+import { usePollStatus } from "./composables/poll/usePollStatus";
 import { flash } from "./stores/flashStore";
 
 const props = defineProps({
