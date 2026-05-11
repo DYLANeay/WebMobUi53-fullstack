@@ -165,14 +165,6 @@ Ma première idée était d'utiliser Apache ECharts, qui est très puissant pour
 
 J'ai délégué le routing à Laravel. Chaque page Blade monte son propre entrypoint Vite indépendant. Cette approche évite d'embarquer un routeur SPA complet (Vue Router) pour une application où les transitions de page sont gérées par le serveur. Elle simplifie aussi l'intégration avec le système d'authentification existant (cookie de session Sanctum).
 
-### Sanctum SPA (cookie de session)
-
-Les apps Vue sont embarquées sur le même domaine que le backend. L'authentification repose sur le **cookie de session** Laravel, pas sur un Bearer token. Le token XSRF est lu depuis le cookie `XSRF-TOKEN` au démarrage et injecté dans chaque requête mutante via `bootstrap.js`.
-
-### Pas de Pinia ni Vuex
-
-L'état partagé entre composants est minimal et géré via des composables à portée de module. Introduire un store global aurait ajouté de la complexité sans bénéfice réel pour la taille de cette application.
-
 ---
 
 ## Fichiers supprimés (refactor — lisibilité)
