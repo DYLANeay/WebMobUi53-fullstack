@@ -3,10 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MyProfileController;
-use App\Http\Controllers\PollCreateController;
-use App\Http\Controllers\PollDashboardController;
-use App\Http\Controllers\PollEditController;
-use App\Http\Controllers\PollShowController;
+use App\Http\Controllers\PollController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TokenController;
@@ -42,13 +39,13 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware("auth")->group(function () {
-    Route::get("/polls/dashboard", PollDashboardController::class)->name(
+    Route::get("/polls/dashboard", [PollController::class, "index"])->name(
         "polls.dashboard",
     );
-    Route::get("/polls/create", PollCreateController::class)->name(
+    Route::get("/polls/create", [PollController::class, "create"])->name(
         "polls.create",
     );
-    Route::get("/polls/{poll}/edit", PollEditController::class)->name(
+    Route::get("/polls/{poll}/edit", [PollController::class, "edit"])->name(
         "polls.edit",
     );
     Route::resource("posts", PostController::class)->except(["index", "show"]);
@@ -67,4 +64,6 @@ Route::middleware("auth")->group(function () {
 });
 
 // at the end so that /polls/dashboard, /polls/create, etc. are matched first.
-Route::get("/polls/{token}", PollShowController::class)->name("polls.show");
+Route::get("/polls/{token}", [PollController::class, "show"])->name(
+    "polls.show",
+);
