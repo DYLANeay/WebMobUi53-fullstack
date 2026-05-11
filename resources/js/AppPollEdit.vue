@@ -154,6 +154,7 @@ function onSaved(poll) {
             message="Une fois lancé, le sondage ne pourra plus être modifié."
             confirm-label="Lancer maintenant"
             cancel-label="Annuler"
+            variant="success"
             @confirm="confirmLaunch"
         />
 
