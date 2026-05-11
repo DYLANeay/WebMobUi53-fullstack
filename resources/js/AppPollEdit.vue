@@ -3,6 +3,7 @@ import { ref } from "vue";
 import PollForm from "./components/PollForm.vue";
 import ShareLink from "./components/ShareLink.vue";
 import FlashToast from "./components/FlashToast.vue";
+import ConfirmModal from "./components/ConfirmModal.vue";
 import { useFetchApi } from "./composables/useFetchApi";
 import { usePollStatus } from "./composables/usePollStatus";
 import { flash } from "./stores/flashStore";
@@ -23,15 +24,15 @@ const { isDraft, statusLabel, statusClass } = usePollStatus(pollRef);
 const { fetchApi } = useFetchApi("/api/v1");
 const launching = ref(false);
 const launchError = ref(null);
+const showLaunchConfirm = ref(false);
 
-async function launchPoll() {
-    const ok = confirm(
-        "Lancer le sondage maintenant ? Il ne pourra plus être modifié.",
-    );
-    if (!ok) return;
-
-    launching.value = true;
+function askLaunch() {
     launchError.value = null;
+    showLaunchConfirm.value = true;
+}
+
+async function confirmLaunch() {
+    launching.value = true;
 
     try {
         await fetchApi({
@@ -140,12 +141,21 @@ function onSaved(poll) {
                     type="button"
                     :disabled="launching"
                     class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
-                    @click="launchPoll"
+                    @click="askLaunch"
                 >
                     {{ launching ? "Lancement…" : "Lancer maintenant" }}
                 </button>
             </div>
         </div>
+
+        <ConfirmModal
+            v-model="showLaunchConfirm"
+            title="Lancer le sondage ?"
+            message="Une fois lancé, le sondage ne pourra plus être modifié."
+            confirm-label="Lancer maintenant"
+            cancel-label="Annuler"
+            @confirm="confirmLaunch"
+        />
 
         <!-- Panneau de partage (visible uniquement si lancé) -->
         <div
