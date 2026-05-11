@@ -11,6 +11,8 @@ const props = defineProps({
     hasVoted: { type: Boolean, default: false },
     votedOptionIds: { type: Array, default: () => [] },
     isOwner: { type: Boolean, default: false },
+    isAuthenticated: { type: Boolean, default: false },
+    loginUrl: { type: String, default: "/auth/login" },
 });
 
 // Ref locale : on mute cette valeur après le vote pour rafraîchir les résultats
@@ -23,7 +25,12 @@ const { isDraft, isRunning, isExpired } = usePollStatus(poll, {
 });
 
 const canVote = computed(() => {
-    return !isDraft.value && isRunning.value && !isExpired.value;
+    return (
+        props.isAuthenticated &&
+        !isDraft.value &&
+        isRunning.value &&
+        !isExpired.value
+    );
 });
 
 const {
@@ -147,6 +154,33 @@ usePolling(refreshResults, 5000);
                 class="rounded-md bg-gray-50 p-4 text-sm text-gray-600 ring-1 ring-inset ring-gray-200"
             >
                 Les résultats de ce sondage ne sont pas publics.
+            </div>
+        </div>
+
+        <div
+            v-else-if="!isAuthenticated && isRunning"
+            class="space-y-6"
+        >
+            <div
+                class="rounded-md bg-indigo-50 p-4 text-sm text-indigo-800 ring-1 ring-inset ring-indigo-200"
+            >
+                Connectez-vous pour participer à ce sondage.
+                <a
+                    :href="loginUrl"
+                    class="font-medium underline hover:text-indigo-900"
+                >
+                    Se connecter
+                </a>
+            </div>
+
+            <div v-if="canSeeResults" class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900">Résultats</h2>
+                <PollResultsChart :options="poll.options" />
+                <p class="text-sm text-gray-500">
+                    Total : {{ totalVotes }} vote{{
+                        totalVotes === 1 ? "" : "s"
+                    }}
+                </p>
             </div>
         </div>
 
