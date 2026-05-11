@@ -12,5 +12,7 @@
         'hasVoted' => $hasVoted,
         'votedOptionIds' => $votedOptionIds,
         'isOwner' => $isOwner,
+        'isAuthenticated' => auth()->check(),
+        'loginUrl' => route('login'),
     ]) }}"></div>
 </x-vue-app-layout>
