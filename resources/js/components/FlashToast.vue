@@ -1,7 +1,5 @@
 <script setup>
-import { useFlash } from "../composables/useFlash";
-
-const { message, type, visible, dismiss } = useFlash();
+import { message, type, visible, dismiss } from "../stores/flashStore";
 </script>
 
 <template>

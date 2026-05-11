@@ -5,7 +5,7 @@ import ShareLink from "./components/ShareLink.vue";
 import FlashToast from "./components/FlashToast.vue";
 import { useFetchApi } from "./composables/useFetchApi";
 import { usePollStatus } from "./composables/usePollStatus";
-import { useFlash } from "./composables/useFlash";
+import { flash } from "./stores/flashStore";
 
 const props = defineProps({
     poll: { type: Object, default: null },
@@ -13,7 +13,6 @@ const props = defineProps({
 });
 
 const isEdit = !!props.poll;
-const { flash } = useFlash();
 
 // ref wrapper pour que le composable puisse y accéder de manière réactive
 const pollRef = ref(props.poll);
