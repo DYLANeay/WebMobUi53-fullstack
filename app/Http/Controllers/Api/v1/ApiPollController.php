@@ -15,11 +15,13 @@ class ApiPollController extends Controller
             "question" => "required|string|min:3|max:500",
             "title" => "nullable|string|max:255",
             "options" => "required|array|min:2|max:20",
-            "options.*.label" => "required|string|min:1|max:255",
+            "options.*.label" => "required|string|min:1|max:255|distinct:ignore_case",
             "allow_multiple_choices" => "boolean",
             "allow_vote_change" => "boolean",
             "results_public" => "boolean",
             "duration" => "nullable|integer|min:60|max:604800",
+        ], [
+            "options.*.label.distinct" => "Chaque option doit être unique (doublon détecté).",
         ]);
 
         $poll = DB::transaction(function () use ($validated, $request) {
@@ -191,11 +193,13 @@ class ApiPollController extends Controller
             "title" => "nullable|string|max:255",
             "options" => "required|array|min:2|max:20",
             "options.*.id" => "nullable|integer|exists:poll_options,id",
-            "options.*.label" => "required|string|min:1|max:255",
+            "options.*.label" => "required|string|min:1|max:255|distinct:ignore_case",
             "allow_multiple_choices" => "boolean",
             "allow_vote_change" => "boolean",
             "results_public" => "boolean",
             "duration" => "nullable|integer|min:60|max:604800",
+        ], [
+            "options.*.label.distinct" => "Chaque option doit être unique (doublon détecté).",
         ]);
         // Detecte les options a supprimer (presentes en base mais absentes du payload)
         $existingIds = $poll->options()->pluck("id")->toArray();

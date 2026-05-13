@@ -31,6 +31,14 @@ export function usePollForm(pollId = null) {
             formErrors.value.options = "Veuillez saisir au moins 2 options.";
         }
 
+        const normalized = filled.map((o) =>
+            o.label.normalize("NFC").trim().toLocaleLowerCase(),
+        );
+        if (new Set(normalized).size !== normalized.length) {
+            formErrors.value.options =
+                "Chaque option doit être unique (doublon détecté).";
+        }
+
         return Object.keys(formErrors.value).length === 0;
     }
 
