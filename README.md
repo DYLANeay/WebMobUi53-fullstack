@@ -41,19 +41,6 @@ Pour un bundle de production à la place du serveur Vite : `npm run build`.
 
 ---
 
-## Installation
-
-J'utilise `chart.js` et `vue-chartjs` pour les graphiques (voir [Choix techniques](#choix-techniques)).
-
-```bash
-npm install
-npm run dev      # serveur Vite avec HMR (dev)
-# ou
-npm run build    # bundle de production
-```
-
----
-
 ## Ce qui a été ajouté au template de départ
 
 ### Modèles (modifiés)
@@ -117,7 +104,7 @@ Chaque page Blade monte sa propre application Vue isolée. Il n'y a pas de route
 
 Les composants sont organisés en sous-dossiers par responsabilité : `poll/` regroupe le domaine métier sondage, `ui/` les briques réutilisables génériques.
 
-#### `components/poll/` — domaine sondage
+#### `components/poll/` : domaine sondage
 
 | Fichier | Rôle |
 |---------|------|
@@ -128,7 +115,7 @@ Les composants sont organisés en sous-dossiers par responsabilité : `poll/` re
 | `PollResultsChart.vue` | Graphique en barres (Chart.js) des résultats, mis à jour réactivement. |
 | `ShareLink.vue` | Affiche le lien de partage avec bouton copie + toast de confirmation. |
 
-#### `components/ui/` — UI générique
+#### `components/ui/` : UI générique
 
 | Fichier | Rôle |
 |---------|------|
@@ -164,7 +151,7 @@ Même logique de découpage que les composants : `api/` pour le client HTTP, `po
 
 | Fichier | Rôle |
 |---------|------|
-| `flashStore.js` | Store global minimaliste de notifications (refs `message`, `type`, `visible` + fonctions `flash()` / `dismiss()`). Pas de Pinia — simple module exportant des `ref` partagés, suffisant pour cette portée. |
+| `flashStore.js` | Store global minimaliste de notifications (refs `message`, `type`, `visible` + fonctions `flash()` / `dismiss()`). Pas de Pinia, simple module exportant des `ref` partagés, suffisant pour cette portée. |
 
 ---
 
@@ -204,7 +191,7 @@ J'ai délégué le routing à Laravel. Chaque page Blade monte son propre entryp
 
 ---
 
-## Fichiers supprimés (refactor — lisibilité)
+## Fichiers supprimés (refactor, lisibilité)
 
 Ces fichiers étaient présents dans le template de départ mais **n'ont jamais été utilisés** par les apps Vue du projet. Les garder créait de la confusion et augmentait la charge cognitive sans valeur ajoutée.
 
@@ -212,7 +199,7 @@ Ces fichiers étaient présents dans le template de départ mais **n'ont jamais 
 |---------|---------------------------|
 | `resources/js/utils/fetchJson.js` | Wrapper `fetch` bas niveau jamais appelé. Le projet utilise exclusivement `useFetchApi.js` pour les requêtes HTTP. |
 | `resources/js/composables/useFetchJson.js` | Dépend de `fetchJson.js` et n'était importé nulle part. |
-| `resources/js/composables/useHashRoute.js` | Router hash interne inutilisé — le routing est entièrement délégué à Laravel (`routes/web.php`). |
+| `resources/js/composables/useHashRoute.js` | Router hash interne inutilisé, le routing est entièrement délégué à Laravel (`routes/web.php`). |
 | `resources/js/composables/useJsonStorage.js` | Wrapper `localStorage` réactif jamais utilisé ; aucun état n'a besoin de persistance locale. |
 | `resources/js/utils/jsonStorage.js` | Utilitaire sous-jacent à `useJsonStorage.js`, également inutilisé. |
 
