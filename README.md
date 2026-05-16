@@ -4,6 +4,43 @@ TP fullstack HEIG-VD WebMobUI - système de sondage multi-plateforme.
 
 ---
 
+## Démarrage rapide depuis un clone
+
+Pour lancer l'application depuis zéro après avoir cloné le dépôt :
+
+```bash
+# 1. Dépendances PHP (Laravel 12)
+composer install
+
+# 2. Dépendances JS (Vue 3.5, Tailwind v4, Chart.js, vue-chartjs)
+npm install
+
+# 3. Fichier d'environnement + clé d'application
+cp .env.example .env
+php artisan key:generate
+
+# 4. Base de données SQLite (par défaut dans .env.example)
+touch database/database.sqlite
+php artisan migrate --seed   # crée les tables + insère 2 utilisateurs et 30 sondages de démo
+
+# 5. Lien symbolique pour le storage (photos de profil)
+php artisan storage:link
+
+# 6. Lancer le serveur de dev 
+composer run dev                  # serveur Vite (HMR) pour les apps Vue
+```
+
+Comptes de démonstration créés par le seeder (mot de passe : `password`) :
+
+| Email | Rôle |
+|-------|------|
+| `john.doe@example.com` | Propriétaire de la moitié des sondages de démo |
+| `jane.doe@example.com` | Propriétaire de l'autre moitié |
+
+Pour un bundle de production à la place du serveur Vite : `npm run build`.
+
+---
+
 ## Installation
 
 J'utilise `chart.js` et `vue-chartjs` pour les graphiques (voir [Choix techniques](#choix-techniques)).
