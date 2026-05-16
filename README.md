@@ -4,16 +4,40 @@ TP fullstack HEIG-VD WebMobUI - système de sondage multi-plateforme.
 
 ---
 
-## Installation
+## Démarrage rapide depuis un clone
 
-J'utilise `chart.js` et `vue-chartjs` pour les graphiques (voir [Choix techniques](#choix-techniques)).
+Pour lancer l'application depuis zéro après avoir cloné le dépôt :
 
 ```bash
+# 1. Dépendances PHP (Laravel 12)
+composer install
+
+# 2. Dépendances JS (Vue 3.5, Tailwind v4, Chart.js, vue-chartjs)
 npm install
-npm run dev      # serveur Vite avec HMR (dev)
-# ou
-npm run build    # bundle de production
+
+# 3. Fichier d'environnement + clé d'application
+cp .env.example .env
+php artisan key:generate
+
+# 4. Base de données SQLite (par défaut dans .env.example)
+touch database/database.sqlite
+php artisan migrate --seed   # crée les tables + insère 2 utilisateurs et 30 sondages de démo
+
+# 5. Lien symbolique pour le storage (photos de profil)
+php artisan storage:link
+
+# 6. Lancer le serveur de dev 
+composer run dev                  # serveur Vite (HMR) pour les apps Vue
 ```
+
+Comptes de démonstration créés par le seeder (mot de passe : `password`) :
+
+| Email | Rôle |
+|-------|------|
+| `john.doe@example.com` | Propriétaire de la moitié des sondages de démo |
+| `jane.doe@example.com` | Propriétaire de l'autre moitié |
+
+Pour un bundle de production à la place du serveur Vite : `npm run build`.
 
 ---
 
@@ -80,7 +104,7 @@ Chaque page Blade monte sa propre application Vue isolée. Il n'y a pas de route
 
 Les composants sont organisés en sous-dossiers par responsabilité : `poll/` regroupe le domaine métier sondage, `ui/` les briques réutilisables génériques.
 
-#### `components/poll/` — domaine sondage
+#### `components/poll/` : domaine sondage
 
 | Fichier | Rôle |
 |---------|------|
@@ -91,7 +115,7 @@ Les composants sont organisés en sous-dossiers par responsabilité : `poll/` re
 | `PollResultsChart.vue` | Graphique en barres (Chart.js) des résultats, mis à jour réactivement. |
 | `ShareLink.vue` | Affiche le lien de partage avec bouton copie + toast de confirmation. |
 
-#### `components/ui/` — UI générique
+#### `components/ui/` : UI générique
 
 | Fichier | Rôle |
 |---------|------|
@@ -127,7 +151,7 @@ Même logique de découpage que les composants : `api/` pour le client HTTP, `po
 
 | Fichier | Rôle |
 |---------|------|
-| `flashStore.js` | Store global minimaliste de notifications (refs `message`, `type`, `visible` + fonctions `flash()` / `dismiss()`). Pas de Pinia — simple module exportant des `ref` partagés, suffisant pour cette portée. |
+| `flashStore.js` | Store global minimaliste de notifications (refs `message`, `type`, `visible` + fonctions `flash()` / `dismiss()`). Pas de Pinia, simple module exportant des `ref` partagés, suffisant pour cette portée. |
 
 ---
 
@@ -167,7 +191,7 @@ J'ai délégué le routing à Laravel. Chaque page Blade monte son propre entryp
 
 ---
 
-## Fichiers supprimés (refactor — lisibilité)
+## Fichiers supprimés (refactor, lisibilité)
 
 Ces fichiers étaient présents dans le template de départ mais **n'ont jamais été utilisés** par les apps Vue du projet. Les garder créait de la confusion et augmentait la charge cognitive sans valeur ajoutée.
 
@@ -175,7 +199,7 @@ Ces fichiers étaient présents dans le template de départ mais **n'ont jamais 
 |---------|---------------------------|
 | `resources/js/utils/fetchJson.js` | Wrapper `fetch` bas niveau jamais appelé. Le projet utilise exclusivement `useFetchApi.js` pour les requêtes HTTP. |
 | `resources/js/composables/useFetchJson.js` | Dépend de `fetchJson.js` et n'était importé nulle part. |
-| `resources/js/composables/useHashRoute.js` | Router hash interne inutilisé — le routing est entièrement délégué à Laravel (`routes/web.php`). |
+| `resources/js/composables/useHashRoute.js` | Router hash interne inutilisé, le routing est entièrement délégué à Laravel (`routes/web.php`). |
 | `resources/js/composables/useJsonStorage.js` | Wrapper `localStorage` réactif jamais utilisé ; aucun état n'a besoin de persistance locale. |
 | `resources/js/utils/jsonStorage.js` | Utilitaire sous-jacent à `useJsonStorage.js`, également inutilisé. |
 
